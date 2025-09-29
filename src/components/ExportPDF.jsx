@@ -102,7 +102,9 @@ export default function ExportPDF({ transactions }) {
     const balance = income - expense;
 
     doc.setFontSize(12);
+    doc.setTextColor(0, 200, 10, 0.9);
     doc.text(`Total Income: Ksh ${income.toFixed(2)}`, 14, finalY);
+    doc.setTextColor(240, 0, 0, 0.9);
     doc.text(`Total Expense: Ksh ${expense.toFixed(2)}`, 14, finalY + 8);
     doc.setFontSize(14);
     doc.setTextColor(22, 163, 74);
