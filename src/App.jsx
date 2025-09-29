@@ -7,6 +7,7 @@ import TransactionList from "./components/TransactionList";
 import BalanceSummary from "./components/BalanceSummary";
 import ExportPDF from "./components/ExportPDF";
 import { addTransaction, getTransactions } from "./db";
+import InstallButton from "./components/InstallButton";
 
 import "./App.css"; // import our custom css
 // Get today's date key (YYYY-MM-DD)
@@ -36,6 +37,7 @@ export default function App() {
   return (
     <div className="app-container">
       <h1>Cashbook 📒 ({todayKey})</h1>
+      <InstallButton />
       <BalanceSummary transactions={transactions} />
       <TransactionForm onAdd={handleAddTransaction} />
       <TransactionList transactions={transactions} />
