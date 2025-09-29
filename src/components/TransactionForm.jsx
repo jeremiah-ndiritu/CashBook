@@ -1,15 +1,27 @@
 // src/components/TransactionForm.jsx
 import { useState } from "react";
+import { toast } from "react-toastify"; // assuming you installed react-toastify
+import "react-toastify/dist/ReactToastify.css";
 import "../styles/TransactionForm.css";
 
 export default function TransactionForm({ onAdd }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
-  const [type, setType] = useState("income");
+  const [type, setType] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!description || !amount) return;
+  const handleAdd = () => {
+    if (!description.trim()) {
+      toast.error("Description is required");
+      return;
+    }
+    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    if (!type) {
+      toast.error("Please select income or expense");
+      return;
+    }
 
     const transaction = {
       id: Date.now(),
@@ -23,11 +35,12 @@ export default function TransactionForm({ onAdd }) {
 
     setDescription("");
     setAmount("");
-    setType("income");
+    setType("");
+    toast.success("Transaction added!");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="transaction-form">
+    <div className="transaction-form">
       <input
         type="text"
         placeholder="Description"
@@ -41,10 +54,11 @@ export default function TransactionForm({ onAdd }) {
         onChange={(e) => setAmount(e.target.value)}
       />
       <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option value="">-- Select Type --</option>
         <option value="income">Income</option>
         <option value="expense">Expense</option>
       </select>
-      <button type="submit">Add</button>
-    </form>
+      <button onClick={handleAdd}>Add</button>
+    </div>
   );
 }
