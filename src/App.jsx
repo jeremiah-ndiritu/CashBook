@@ -42,7 +42,7 @@ export default function App() {
       <TransactionForm onAdd={handleAddTransaction} />
       <TransactionList transactions={transactions} />
       <ExportPDF transactions={transactions} />
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </div>
   );
 }

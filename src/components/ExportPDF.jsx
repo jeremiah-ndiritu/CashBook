@@ -7,7 +7,7 @@ import "../styles/ExportPDF.css";
 export default function ExportPDF({ transactions }) {
   const [reportType, setReportType] = useState("today");
 
-  // Get filtered transactions
+  // Filter transactions by type
   const filterTransactions = () => {
     const now = new Date();
     const todayKey = now.toISOString().split("T")[0];
@@ -18,7 +18,7 @@ export default function ExportPDF({ transactions }) {
 
     if (reportType === "last7") {
       const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(now.getDate() - 6); // includes today
+      sevenDaysAgo.setDate(now.getDate() - 6);
       return transactions.filter((t) => new Date(t.date) >= sevenDaysAgo);
     }
 
@@ -42,7 +42,7 @@ export default function ExportPDF({ transactions }) {
     const filtered = filterTransactions();
     const doc = new jsPDF();
 
-    // Header
+    // Header banner
     doc.setFillColor(22, 163, 74);
     doc.rect(0, 0, 210, 30, "F");
     doc.setTextColor(255, 255, 255);
@@ -61,6 +61,13 @@ export default function ExportPDF({ transactions }) {
     });
     doc.setTextColor(0, 0, 0);
 
+    if (filtered.length === 0) {
+      doc.setFontSize(14);
+      doc.text("No transactions found for this report.", 14, 50);
+      doc.save(`cashbook-report-${new Date().toISOString().split("T")[0]}.pdf`);
+      return;
+    }
+
     // Totals
     let income = 0;
     let expense = 0;
@@ -70,13 +77,15 @@ export default function ExportPDF({ transactions }) {
       return [
         new Date(t.date).toLocaleDateString(),
         t.description,
+        t.paymentMethod || "N/A",
         t.type.charAt(0).toUpperCase() + t.type.slice(1),
         `Ksh ${t.amount.toFixed(2)}`,
       ];
     });
 
+    // Table
     autoTable(doc, {
-      head: [["Date", "Description", "Type", "Amount"]],
+      head: [["Date", "Description", "Payment Method", "Type", "Amount"]],
       body: rows,
       startY: 40,
       styles: { fontSize: 11, cellPadding: 3 },
@@ -88,6 +97,7 @@ export default function ExportPDF({ transactions }) {
       bodyStyles: { halign: "center" },
     });
 
+    // Totals & Balance
     const finalY = doc.lastAutoTable.finalY + 10;
     const balance = income - expense;
 
@@ -98,49 +108,29 @@ export default function ExportPDF({ transactions }) {
     doc.setTextColor(22, 163, 74);
     doc.text(`Balance: Ksh ${balance.toFixed(2)}`, 14, finalY + 20);
 
-    doc.save(`cashbook-report-${new Date().toISOString().split("T")[0]}.pdf`);
+    // File name → YYYY-MM-DD
+    const dateStr = new Date().toISOString().split("T")[0];
+    doc.save(`cashbook-report-${dateStr}.pdf`);
   };
 
   return (
     <div className="export-box">
       <h3>Select Report Type</h3>
       <div className="report-options">
-        <label>
-          <input
-            type="radio"
-            value="today"
-            checked={reportType === "today"}
-            onChange={(e) => setReportType(e.target.value)}
-          />
-          Today
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="last7"
-            checked={reportType === "last7"}
-            onChange={(e) => setReportType(e.target.value)}
-          />
-          Last 7 Days
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="month"
-            checked={reportType === "month"}
-            onChange={(e) => setReportType(e.target.value)}
-          />
-          This Month
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="all"
-            checked={reportType === "all"}
-            onChange={(e) => setReportType(e.target.value)}
-          />
-          All Records
-        </label>
+        {["today", "last7", "month", "all"].map((type) => (
+          <label key={type}>
+            <input
+              type="radio"
+              value={type}
+              checked={reportType === type}
+              onChange={(e) => setReportType(e.target.value)}
+            />
+            {type === "today" && "Today"}
+            {type === "last7" && "Last 7 Days"}
+            {type === "month" && "This Month"}
+            {type === "all" && "All Records"}
+          </label>
+        ))}
       </div>
 
       <button onClick={generatePDF} className="export-btn">

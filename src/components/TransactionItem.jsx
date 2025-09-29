@@ -1,4 +1,3 @@
-// src/components/TransactionItem.jsx
 import "../styles/TransactionItem.css";
 
 export default function TransactionItem({ transaction }) {
@@ -8,7 +7,12 @@ export default function TransactionItem({ transaction }) {
         transaction.type === "income" ? "income" : "expense"
       }`}
     >
-      <span className="transaction-desc">{transaction.description}</span>
+      <div className="transaction-main">
+        <span className="transaction-desc">{transaction.description}</span>
+        <span className={`transaction-method ${transaction.paymentCategory}`}>
+          {transaction.paymentMethod}
+        </span>
+      </div>
       <span className="transaction-amount">
         {transaction.type === "income" ? "+" : "-"} Ksh {transaction.amount}
       </span>

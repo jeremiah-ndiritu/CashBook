@@ -1,29 +1,72 @@
 /* src/styles/TransactionItem.css */
-
 .transaction-item {
   display: flex;
   justify-content: space-between;
-  padding: 10px 12px;
-  border-bottom: 1px solid #e2e6ea;
-  font-size: 15px;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.1s ease;
 }
 
-.transaction-item:last-child {
-  border-bottom: none;
+.transaction-item:hover {
+  transform: translateY(-2px);
+}
+
+.transaction-item.income {
+  border-left: 4px solid #16a34a; /* green */
+}
+
+.transaction-item.expense {
+  border-left: 4px solid #dc2626; /* red */
+}
+
+.transaction-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .transaction-desc {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.transaction-method {
+  font-size: 0.75rem;
   font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
+  text-transform: capitalize;
+}
+
+.transaction-method::before {
+  content: "💳 ";
+  font-size: 0.8rem;
+}
+
+/* Payment method colors */
+.transaction-method.cash {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.transaction-method.mpesa {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.transaction-method.paybill {
+  background: #dbeafe;
+  color: #1e3a8a;
 }
 
 .transaction-amount {
   font-weight: bold;
-}
-
-.transaction-item.income .transaction-amount {
-  color: #27ae60; /* green */
-}
-
-.transaction-item.expense .transaction-amount {
-  color: #e74c3c; /* red */
+  font-size: 1rem;
 }
