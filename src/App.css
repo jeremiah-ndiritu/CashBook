@@ -1,0 +1,64 @@
+/* src/App.css */
+
+/* Global reset-ish */
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.app-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Card look for all components */
+.balance-summary,
+.transaction-form,
+.transaction-list,
+.export-pdf-btn {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* PDF export button */
+.export-pdf-btn {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  transition: background 0.2s;
+}
+
+.export-pdf-btn:hover {
+  background: #219150;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 10px;
+  }
+  .app-title {
+    font-size: 1.5rem;
+  }
+}

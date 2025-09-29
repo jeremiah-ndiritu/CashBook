@@ -1,0 +1,43 @@
+/* src/components/TransactionForm.css */
+
+.transaction-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #f9fafc;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-form input,
+.transaction-form select {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px;
+  border: 1px solid #ccd1d9;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus {
+  border-color: #3498db;
+}
+
+.transaction-form button {
+  padding: 10px 18px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.transaction-form button:hover {
+  background: #2c80b4;
+}

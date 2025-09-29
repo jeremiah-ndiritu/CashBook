@@ -1,0 +1,29 @@
+/* src/styles/TransactionItem.css */
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e6ea;
+  font-size: 15px;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-desc {
+  font-weight: 500;
+}
+
+.transaction-amount {
+  font-weight: bold;
+}
+
+.transaction-item.income .transaction-amount {
+  color: #27ae60; /* green */
+}
+
+.transaction-item.expense .transaction-amount {
+  color: #e74c3c; /* red */
+}

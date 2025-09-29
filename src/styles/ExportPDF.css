@@ -1,0 +1,24 @@
+/* src/styles/ExportPDF.css */
+
+.export-btn {
+  background-color: #16a34a; /* green */
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.export-btn:hover {
+  background-color: #15803d; /* darker green */
+  transform: translateY(-2px);
+}
+
+.export-btn:active {
+  transform: translateY(0);
+  background-color: #166534;
+}
