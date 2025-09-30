@@ -146,7 +146,7 @@ export default function BalanceSummary({ transactions }) {
 
         <div className="balance-card" onClick={() => handleOpen("expenses")}>
           <h4>Total Expenses Today</h4>
-          <p>Ksh {ts.paidExpense.toFixed(2)}</p>
+          <p>Ksh {(ts.paidExpense + ts.expenseDeposits).toFixed(2)}</p>
         </div>
 
         <div
