@@ -5,7 +5,6 @@ export default function BalanceSummary({ transactions }) {
   const now = new Date();
   const todayKey = getLocalDateKey(now);
   transactions = transactions.filter((t) => t.dayKey == todayKey);
-  console.log("transactions :>> ", transactions);
 
   const paidIncome = transactions
     .filter((t) => t.type === "income" && t.paymentStatus === "paid")
