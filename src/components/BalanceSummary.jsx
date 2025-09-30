@@ -12,7 +12,7 @@ export default function BalanceSummary({ transactions }) {
 
   const creditIncome = transactions
     .filter((t) => t.type === "income" && t.paymentStatus !== "paid")
-    .reduce((acc, t) => acc + t.amount, 0);
+    .reduce((acc, t) => acc + (t.amount - t.deposit), 0);
 
   const paidExpense = transactions
     .filter((t) => t.type === "expense" && t.paymentStatus === "paid")
@@ -32,7 +32,9 @@ export default function BalanceSummary({ transactions }) {
       </div>
       <div className="balance-card">
         <h4>Total Debts Today</h4>
-        <p>Ksh {creditIncome + debtExpense}</p>
+        <p style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+          <span>- {debtExpense}</span> <span>+ {creditIncome}</span>
+        </p>
       </div>
       <div className="balance-card">
         <h4>Total Expenses Today</h4>

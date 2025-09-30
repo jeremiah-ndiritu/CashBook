@@ -62,8 +62,8 @@ export default function TransactionForm({ onAdd }) {
       amount: parseFloat(amount),
       paymentMethod,
       type,
-      paymentStatus: starn(credit), // full | partial | unpaid
-      deposit,
+      paymentStatus: starn(credit), // paid | partial | unpaid
+      deposit: parseFloat(deposit),
       debtorName: debtorName.trim() || null,
       debtorNumber: debtorNumber.trim() || null,
       date: new Date().toISOString(),
