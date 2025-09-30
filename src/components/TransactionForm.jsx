@@ -4,6 +4,18 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/TransactionForm.css";
 
+const starn = (str = "") => {
+  switch (str) {
+    case "full":
+      return "paid";
+    case "partial":
+      return "partial";
+    case "unpaid":
+      return "unpaid";
+    default:
+      return "N/A";
+  }
+};
 export default function TransactionForm({ onAdd }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -50,7 +62,7 @@ export default function TransactionForm({ onAdd }) {
       amount: parseFloat(amount),
       paymentMethod,
       type,
-      credit, // full | partial | unpaid
+      payMentStatus: starn(credit), // full | partial | unpaid
       deposit,
       debtorName: debtorName.trim() || null,
       debtorNumber: debtorNumber.trim() || null,

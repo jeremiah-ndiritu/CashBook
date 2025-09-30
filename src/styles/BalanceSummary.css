@@ -1,251 +1,57 @@
-/* src/styles/BalanceSummary.css */
-
-/* --- Theme variables --- */
-:root {
-  --bg: #f6f8fa;
-  --card: #ffffff;
-  --muted: #6b7280;
-  --accent: #16a34a; /* green */
-  --accent-dark: #13803d;
-  --danger: #ef4444; /* red */
-  --surface-shadow: 0 6px 20px rgba(16, 24, 40, 0.06);
-  --glass: rgba(255, 255, 255, 0.6);
-  --radius: 12px;
-  --max-width: 720px;
-  --padding: 18px;
-  --font-sans: Inter, "Segoe UI", Roboto, system-ui, -apple-system,
-    "Helvetica Neue", Arial;
-}
-
-/* --- Container --- */
-.balance-summary {
-  width: 100%;
-  max-width: var(--max-width);
-  margin: 18px auto;
-  padding: 14px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), var(--card));
-  border-radius: var(--radius);
-  box-shadow: var(--surface-shadow);
-  color: #0f172a;
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  border: 1px solid rgba(15, 23, 42, 0.03);
-}
-
-/* --- Title --- */
-.balance-title {
-  margin: 0 0 12px 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  color: #0b1220;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* small subtitle / tagline */
-.balance-title::after {
-  content: "Quick snapshot";
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--muted);
-  margin-left: auto;
-}
-
-/* --- Table layout: uses grid to be flexible --- */
-.balance-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 6px;
-  overflow: hidden;
+/* BalanceSummary.css */
+.balance-summary-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 16px 0;
 }
 
-/* Table cells are cards themselves for mobile-friendly layout */
-.balance-table thead,
-.balance-table tbody,
-.balance-table tfoot {
-  display: contents; /* allow grid children to control layout */
+.balance-card {
+  background: #f0fdf4; /* light green */
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-/* Row-like card */
-.balance-table tbody tr,
-.balance-table thead tr {
-  display: contents;
+.balance-card:hover {
+  transform: translateY(-2px);
 }
 
-.balance-table tbody tr:nth-child(odd) .cell,
-.balance-table tbody tr:nth-child(even) .cell {
-  /* subtle alternation if needed */
+.balance-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #16a34a;
 }
 
-/* Each cell block */
-.cell {
-  background: linear-gradient(180deg, rgba(250, 250, 250, 0.8), var(--card));
-  border-radius: 10px;
-  padding: 12px;
-  border: 1px solid rgba(11, 22, 40, 0.03);
-  box-shadow: 0 4px 10px rgba(2, 6, 23, 0.03);
-  min-height: 72px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.balance-card p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #065f46; /* darker green */
 }
 
-/* Header labels */
-.cell .label {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 600;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-/* Values */
-.cell .value {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #071029;
-}
-
-/* Sub-values / small notes */
-.cell .meta {
-  margin-top: 6px;
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-/* Highlight colors for specific cells */
-.cell.credit .value {
-  color: var(--accent-dark);
-}
-.cell.debit .value {
-  color: var(--danger);
-}
-.cell.pending .value {
-  color: #b45309;
-} /* amber for pending */
-
-/* Footer: totals row spans full width */
-.balance-table tfoot .cell {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px;
-  background: linear-gradient(
-    90deg,
-    rgba(22, 163, 74, 0.06),
-    rgba(255, 255, 255, 0.6)
-  );
-  border-radius: 10px;
-  border: 1px solid rgba(11, 22, 40, 0.04);
-}
-
-/* Footer strong text */
-.balance-table tfoot .summary {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #0b1220;
-}
-
-.balance-table tfoot .summary .small {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-left: 8px;
-  font-weight: 500;
-}
-
-/* --- Desktop tweaks: show grid as 2 columns of cards */
-@media (min-width: 720px) {
-  .balance-table {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .cell {
-    min-height: 86px;
-    padding: 16px;
-  }
-  .cell .value {
-    font-size: 1.2rem;
-  }
-  .balance-title {
-    font-size: 1.15rem;
-  }
-}
-
-/* --- Very small screens: stack into single column --- */
-@media (max-width: 520px) {
-  .balance-summary {
-    padding: 12px;
-    border-radius: 10px;
-  }
-  .balance-table {
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .balance-summary-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
   }
-  .cell {
-    padding: 10px;
-    min-height: 64px;
+
+  .balance-card {
+    padding: 12px;
   }
-  .cell .value {
-    font-size: 1rem;
+
+  .balance-card h4 {
+    font-size: 13px;
   }
-  .balance-title::after {
-    display: none;
+
+  .balance-card p {
+    font-size: 16px;
   }
 }
 
-/* --- Micro polish for accessibility & interaction --- */
-.cell:focus-within,
-.cell:hover {
-  transform: translateY(-3px);
-  transition: transform 160ms ease;
-  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.08);
-}
-
-/* Utility spacing for content inside component if you want rows */
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-/* Nice small badge for quick status if needed */
-.badge {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: #fff;
-}
-
-.badge.paid {
-  background: var(--accent-dark);
-}
-.badge.pending {
-  background: #f59e0b;
-}
-.badge.debt {
-  background: var(--danger);
-}
-.badge.info {
-  background: #2563eb;
-}
-
-/* small print footer under the component */
-.balance-note {
-  margin-top: 10px;
-  font-size: 0.82rem;
-  color: var(--muted);
-  text-align: right;
+/* Highlight negative balances in red */
+.balance-card.balance-negative p {
+  color: #dc2626; /* red for negative */
 }

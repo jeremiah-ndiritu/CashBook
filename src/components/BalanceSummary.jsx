@@ -1,8 +1,12 @@
 // src/components/BalanceSummary.jsx
 import "../styles/BalanceSummary.css";
-
+import { getLocalDateKey } from "../utils/utils";
 export default function BalanceSummary({ transactions }) {
-  // Group transactions by type + status
+  const now = new Date();
+  const todayKey = getLocalDateKey(now);
+  transactions = transactions.filter((t) => t.dayKey == todayKey);
+  console.log("transactions :>> ", transactions);
+
   const paidIncome = transactions
     .filter((t) => t.type === "income" && t.paymentStatus === "paid")
     .reduce((acc, t) => acc + t.amount, 0);
@@ -19,44 +23,28 @@ export default function BalanceSummary({ transactions }) {
     .filter((t) => t.type === "expense" && t.paymentStatus !== "paid")
     .reduce((acc, t) => acc + t.amount, 0);
 
-  // Real cash balance (only paid amounts)
   const realBalance = paidIncome - paidExpense;
 
-  // Outstanding (expected inflows - owed outflows)
-  const pendingBalance = creditIncome - debtExpense;
-
   return (
-    <div className="balance-summary">
-      <h2 className="balance-title">Balance Summary</h2>
-
-      <table className="balance-table">
-        <thead>
-          <tr>
-            <th>Credit (In)</th>
-            <th>Debit (Out)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Received: Ksh {paidIncome}</td>
-            <td>Spent: Ksh {paidExpense}</td>
-          </tr>
-          <tr>
-            <td>Pending (to receive): Ksh {creditIncome}</td>
-            <td>Debts (owed to others): Ksh {debtExpense}</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colSpan="2">
-              <strong>Real Balance:</strong> Ksh {realBalance} <br />
-              <strong>Pending Balance:</strong> Ksh {pendingBalance} <br />
-              <strong>Total (if all paid):</strong> Ksh{" "}
-              {realBalance + pendingBalance}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+    <div className="balance-summary-grid">
+      <div className="balance-card">
+        <h4>Total Income Today</h4>
+        <p>Ksh {paidIncome.toFixed(2)}</p>
+      </div>
+      <div className="balance-card">
+        <h4>Total Debts Today</h4>
+        <p>Ksh {creditIncome + debtExpense}</p>
+      </div>
+      <div className="balance-card">
+        <h4>Total Expenses Today</h4>
+        <p>Ksh {paidExpense.toFixed(2)}</p>
+      </div>
+      <div
+        className={`balance-card ${realBalance < 0 ? "balance-negative" : ""}`}
+      >
+        <h4>Current Balance</h4>
+        <p>Ksh {realBalance.toFixed(2)}</p>
+      </div>
     </div>
   );
 }
