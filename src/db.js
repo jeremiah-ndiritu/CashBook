@@ -34,16 +34,19 @@ export async function addTransaction(transaction) {
 
   // If credit is partial or unpaid, save debt info
   if (transaction.credit && transaction.credit !== "full") {
-    await addDebt({
+    const debt = {
       transactionId: transaction.id,
       debtorName: transaction.debtorName || null,
       debtorNumber: transaction.debtorNumber || null,
+      type: transaction.type,
       amountOwed:
         transaction.credit === "partial"
-          ? transaction.amount / 2 // you can adjust how partial is calculated
+          ? transaction.amount - transaction.deposit
           : transaction.amount,
       date: transaction.date,
-    });
+    };
+    await addDebt(debt);
+    return debt;
   }
 }
 

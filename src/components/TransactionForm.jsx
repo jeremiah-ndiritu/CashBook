@@ -10,6 +10,7 @@ export default function TransactionForm({ onAdd }) {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [type, setType] = useState("");
   const [credit, setCredit] = useState("");
+  const [deposit, setDeposit] = useState("");
   const [debtorName, setDebtorName] = useState("");
   const [debtorNumber, setDebtorNumber] = useState("");
 
@@ -34,7 +35,9 @@ export default function TransactionForm({ onAdd }) {
       toast.error("Please select credit status");
       return;
     }
-
+    if (credit == "partial" && !deposit) {
+      toast.error("Please enter the deposit amount");
+    }
     // If not full payment, at least one debtor field required
     if (credit !== "full" && !debtorName.trim() && !debtorNumber.trim()) {
       toast.error("Enter at least debtor name or number");
@@ -48,6 +51,7 @@ export default function TransactionForm({ onAdd }) {
       paymentMethod,
       type,
       credit, // full | partial | unpaid
+      deposit,
       debtorName: debtorName.trim() || null,
       debtorNumber: debtorNumber.trim() || null,
       date: new Date().toISOString(),
@@ -61,6 +65,7 @@ export default function TransactionForm({ onAdd }) {
     setPaymentMethod("");
     setType("");
     setCredit("");
+    setDeposit("");
     setDebtorName("");
     setDebtorNumber("");
     toast.success("Transaction added!");
@@ -115,6 +120,12 @@ export default function TransactionForm({ onAdd }) {
         <div
           className={`debtor-info-wrapper ${credit !== "full" ? "show" : ""}`}
         >
+          <input
+            type="number"
+            placeholder="Deposit made"
+            value={deposit}
+            onChange={(e) => setDeposit(e.target.value)}
+          />
           <input
             type="text"
             placeholder="Debtor Name"

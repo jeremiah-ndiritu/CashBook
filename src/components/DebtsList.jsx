@@ -1,20 +1,8 @@
 // src/components/DebtsList.jsx
-import { useEffect, useState } from "react";
-import { getDebts } from "../db";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import "../styles/DebtsList.css";
 
-export default function DebtsList() {
-  const [debts, setDebts] = useState([]);
-
-  useEffect(() => {
-    async function fetchDebts() {
-      const storedDebts = await getDebts();
-      setDebts(storedDebts);
-    }
-    fetchDebts();
-  }, []);
-
+export default function DebtsList({ debts }) {
   if (debts.length === 0) {
     return <p className="no-debts">No debts recorded yet.</p>;
   }
@@ -33,30 +21,42 @@ export default function DebtsList() {
           </tr>
         </thead>
         <tbody>
-          {debts.map((d) => {
-            let formattedNumber = "-";
-            if (d.debtorNumber) {
-              const phoneNumber = parsePhoneNumberFromString(
-                d.debtorNumber,
-                "KE"
-              );
-              formattedNumber =
-                phoneNumber?.formatInternational() || d.debtorNumber;
+          {(debts || []).map((d) => {
+            if (!d) return null; // skip undefined entries
+
+            const debtorName = d.debtorName || "-";
+            const debtorNumber = d.debtorNumber || "-";
+            const transactionId = d.transactionId || "-";
+            const amountOwed = d.amountOwed ? d.amountOwed.toFixed(2) : "0.00";
+            const date = d.date ? new Date(d.date).toLocaleDateString() : "-";
+
+            let formattedNumber = debtorNumber;
+            if (debtorNumber !== "-" && debtorNumber !== null) {
+              try {
+                const phoneNumber = parsePhoneNumberFromString(
+                  debtorNumber,
+                  "KE"
+                );
+                formattedNumber =
+                  phoneNumber?.formatInternational() || debtorNumber;
+              } catch {
+                formattedNumber = debtorNumber;
+              }
             }
 
             return (
-              <tr key={d.id}>
-                <td>{d.debtorName || "-"}</td>
+              <tr key={d.id || Math.random()}>
+                <td>{debtorName}</td>
                 <td>
-                  {d.debtorNumber ? (
-                    <a href={`tel:${formattedNumber}`}>{d.debtorNumber}</a>
+                  {debtorNumber !== "-" ? (
+                    <a href={`tel:${formattedNumber}`}>{debtorNumber}</a>
                   ) : (
                     "-"
                   )}
                 </td>
-                <td>{d.transactionId}</td>
-                <td>{d.amountOwed.toFixed(2)}</td>
-                <td>{new Date(d.date).toLocaleDateString()}</td>
+                <td>{transactionId}</td>
+                <td>{amountOwed}</td>
+                <td>{date}</td>
               </tr>
             );
           })}

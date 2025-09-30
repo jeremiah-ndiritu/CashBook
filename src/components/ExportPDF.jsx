@@ -12,7 +12,7 @@ function getLocalDateKey(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
-export default function ExportPDF({ transactions }) {
+export default function ExportPDF({ transactions, debts }) {
   const [reportType, setReportType] = useState("today");
 
   // Filter transactions based on report type
@@ -23,13 +23,11 @@ export default function ExportPDF({ transactions }) {
     if (reportType === "today") {
       return transactions.filter((t) => t.dayKey === todayKey);
     }
-
     if (reportType === "last7") {
       const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(now.getDate() - 6); // last 7 days including today
+      sevenDaysAgo.setDate(now.getDate() - 6);
       return transactions.filter((t) => new Date(t.date) >= sevenDaysAgo);
     }
-
     if (reportType === "month") {
       const month = now.getMonth();
       const year = now.getFullYear();
@@ -38,11 +36,9 @@ export default function ExportPDF({ transactions }) {
         return d.getMonth() === month && d.getFullYear() === year;
       });
     }
-
     if (reportType === "all") {
       return transactions;
     }
-
     return [];
   };
 
@@ -85,7 +81,7 @@ export default function ExportPDF({ transactions }) {
     });
     const balance = income - expense;
 
-    // Show summary totals
+    // Summary totals
     doc.setFontSize(12);
     doc.setTextColor(0, 200, 10);
     doc.text(`Total Income: Ksh ${income.toFixed(2)}`, 14, 40);
@@ -96,45 +92,128 @@ export default function ExportPDF({ transactions }) {
     doc.setTextColor(22, 163, 74);
     doc.text(`Balance: Ksh ${balance.toFixed(2)}`, 14, 60);
 
-    // Summary mode: only show latest 5 transactions
+    // Summary mode: only latest 5 transactions
     if (mode === "summary") {
       const latest = filtered
         .slice(-5)
+        .filter((t) => t) // filter out undefined
         .map((t) => [
           getLocalDateKey(new Date(t.date)),
           t.type.charAt(0).toUpperCase() + t.type.slice(1),
           `Ksh ${t.amount.toFixed(2)}`,
         ]);
 
-      autoTable(doc, {
-        head: [["Date", "Type", "Amount"]],
-        body: latest,
-        startY: 75,
-        styles: { fontSize: 10, cellPadding: 2 },
-        headStyles: { fillColor: [22, 163, 74], textColor: 255 },
-      });
+      if (latest.length > 0) {
+        autoTable(doc, {
+          head: [["Date", "Type", "Amount"]],
+          body: latest,
+          startY: 75,
+          styles: { fontSize: 10, cellPadding: 2 },
+          headStyles: { fillColor: [22, 163, 74], textColor: 255 },
+        });
+      }
 
       doc.save(`cashbook-summary-${getLocalDateKey()}.pdf`);
       return;
     }
 
-    // Full report table
-    const rows = filtered.map((t) => [
-      getLocalDateKey(new Date(t.date)),
-      t.description,
-      t.paymentMethod || "N/A",
-      t.type.charAt(0).toUpperCase() + t.type.slice(1),
-      `Ksh ${t.amount.toFixed(2)}`,
-    ]);
+    // Full transactions table
+    const rows = filtered
+      .filter((t) => t) // skip undefined
+      .map((t) => [
+        getLocalDateKey(new Date(t.date)),
+        t.description || "-",
+        t.paymentMethod || "N/A",
+        t.type.charAt(0).toUpperCase() + t.type.slice(1),
+        `Ksh ${t.amount.toFixed(2)}`,
+      ]);
 
-    autoTable(doc, {
-      head: [["Date", "Description", "Payment Method", "Type", "Amount"]],
-      body: rows,
-      startY: 75,
-      styles: { fontSize: 11, cellPadding: 3 },
-      headStyles: { fillColor: [22, 163, 74], textColor: 255 },
-      bodyStyles: { halign: "center" },
-    });
+    if (rows.length > 0) {
+      autoTable(doc, {
+        head: [["Date", "Description", "Payment Method", "Type", "Amount"]],
+        body: rows,
+        startY: 75,
+        styles: { fontSize: 11, cellPadding: 3 },
+        headStyles: { fillColor: [22, 163, 74], textColor: 255 },
+        bodyStyles: { halign: "center" },
+      });
+    }
+
+    // Debts table
+    if (debts && debts.length > 0) {
+      const debtRows = debts
+        .filter((d) => d && d.amountOwed != null)
+        .map((d) => [
+          d.debtorName || "-",
+          d.debtorNumber || "-",
+          d.type === "income" ||
+          d.type == "" ||
+          d.type == undefined ||
+          d.type == null
+            ? "Expected Income"
+            : "Expected Expense",
+          `Ksh ${d.amountOwed.toFixed(2)}`,
+          d.date ? getLocalDateKey(new Date(d.date)) : "-",
+        ]);
+
+      if (debtRows.length > 0) {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.setTextColor(22, 163, 74);
+        doc.text("Debts / Credit Records", 14, 20);
+
+        autoTable(doc, {
+          head: [["Debtor", "Phone", "Type", "Amount Owed", "Date"]],
+          body: debtRows,
+          startY: 30,
+          styles: { fontSize: 11, cellPadding: 3 },
+          headStyles: {
+            fillColor: [22, 163, 74],
+            textColor: 255,
+            halign: "center",
+          },
+          bodyStyles: { halign: "center" },
+        });
+
+        // Totals below debts table
+        const finalY = doc.lastAutoTable.finalY + 10;
+
+        const totalExpectedIncome = debts
+          .filter((d) => d.type === "income" && d.amountOwed != null)
+          .reduce((sum, d) => sum + d.amountOwed, 0);
+
+        const totalExpectedExpense = debts
+          .filter((d) => d.type === "expense" && d.amountOwed != null)
+          .reduce((sum, d) => sum + d.amountOwed, 0);
+
+        // Display totals
+        doc.setFontSize(12);
+        doc.setTextColor(0, 200, 0); // green for expected income
+        doc.text(
+          `Total Expected Income: Ksh ${totalExpectedIncome.toFixed(2)}`,
+          14,
+          finalY
+        );
+
+        doc.setTextColor(240, 0, 0); // red for expected expense
+        doc.text(
+          `Total Expected Expense: Ksh ${totalExpectedExpense.toFixed(2)}`,
+          14,
+          finalY + 8
+        );
+
+        // Net Debts: income - expense
+        const netDebts = totalExpectedIncome - totalExpectedExpense;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        if (netDebts >= 0) {
+          doc.setTextColor(0, 150, 0); // positive, green
+        } else {
+          doc.setTextColor(200, 0, 0); // negative, red
+        }
+        doc.text(`Net Debts: Ksh ${netDebts.toFixed(2)}`, 14, finalY + 20);
+      }
+    }
 
     doc.save(`cashbook-report-${getLocalDateKey()}.pdf`);
   };
@@ -159,16 +238,17 @@ export default function ExportPDF({ transactions }) {
         ))}
       </div>
 
-      <button
-        onClick={() => generatePDF("summary")}
-        className="export-btn summary"
-      >
-        Export Summary PDF
-      </button>
-
-      <button onClick={() => generatePDF("full")} className="export-btn full">
-        Export Full Report PDF
-      </button>
+      <div className="buttons">
+        <button
+          onClick={() => generatePDF("summary")}
+          className="export-btn summary"
+        >
+          Export Summary PDF
+        </button>
+        <button onClick={() => generatePDF("full")} className="export-btn full">
+          Export Full Report PDF
+        </button>
+      </div>
     </div>
   );
 }

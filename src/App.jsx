@@ -6,7 +6,7 @@ import TransactionForm from "./components/TransactionForm";
 import TransactionList from "./components/TransactionList";
 import BalanceSummary from "./components/BalanceSummary";
 import ExportPDF from "./components/ExportPDF";
-import { addTransaction, getTransactions } from "./db";
+import { addTransaction, getTransactions, getDebts } from "./db";
 import InstallButton from "./components/InstallButton";
 import DebtsList from "./components/DebtsList";
 
@@ -22,6 +22,7 @@ function getTodayKey() {
 
 export default function App() {
   const [transactions, setTransactions] = useState([]);
+  const [debts, setDebts] = useState([]);
   const [todayKey, setTodayKey] = useState(getTodayKey());
 
   // Reload todayKey every minute so if date changes, it updates
@@ -36,17 +37,19 @@ export default function App() {
   }, [todayKey]);
   useEffect(() => {
     async function fetchData() {
-      const stored = await getTransactions();
-      // only today’s
-      setTransactions(stored.reverse());
+      const tsxs = await getTransactions();
+      const debts = await getDebts();
+      setDebts(debts.reverse());
+      setTransactions(tsxs.reverse());
     }
     fetchData();
   }, [todayKey]);
 
   const handleAddTransaction = async (transaction) => {
     const newTx = { ...transaction, dayKey: todayKey };
-    await addTransaction(newTx);
+    let debt = await addTransaction(newTx);
     setTransactions((prev) => [newTx, ...prev]);
+    setDebts((prev) => [debt, ...prev]);
   };
 
   return (
@@ -59,8 +62,8 @@ export default function App() {
         transactions={transactions.filter((t) => t.dayKey === todayKey)}
       />
 
-      <DebtsList />
-      <ExportPDF transactions={transactions} />
+      <DebtsList debts={debts} />
+      <ExportPDF transactions={transactions} debts={debts} />
       <ToastContainer
         position="top-right"
         autoClose={3000} // closes in 3s
