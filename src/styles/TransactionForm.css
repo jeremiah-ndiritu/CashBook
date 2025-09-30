@@ -9,6 +9,28 @@
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+.debtor-info-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  margin-top: 0;
+}
+
+.debtor-info-wrapper.show {
+  max-height: 120px; /* enough for two inputs */
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.debtor-info-wrapper input {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
 .transaction-form input,
 .transaction-form select {

@@ -70,3 +70,9 @@
   font-weight: bold;
   font-size: 1rem;
 }
+.transaction-item.income .transaction-amount {
+  color: #15803d;
+}
+.transaction-item.expense .transaction-amount {
+  color: #dc2626;
+}

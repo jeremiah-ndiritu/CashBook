@@ -8,22 +8,37 @@ import BalanceSummary from "./components/BalanceSummary";
 import ExportPDF from "./components/ExportPDF";
 import { addTransaction, getTransactions } from "./db";
 import InstallButton from "./components/InstallButton";
+import DebtsList from "./components/DebtsList";
 
 import "./App.css"; // import our custom css
 // Get today's date key (YYYY-MM-DD)
 function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export default function App() {
   const [transactions, setTransactions] = useState([]);
-  const [todayKey] = useState(getTodayKey());
+  const [todayKey, setTodayKey] = useState(getTodayKey());
 
+  // Reload todayKey every minute so if date changes, it updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newKey = getTodayKey();
+      if (newKey !== todayKey) {
+        setTodayKey(newKey);
+      }
+    }, 60_000); // check every 60s
+    return () => clearInterval(interval);
+  }, [todayKey]);
   useEffect(() => {
     async function fetchData() {
       const stored = await getTransactions();
       // only today’s
-      setTransactions(stored.filter((t) => t.dayKey === todayKey));
+      setTransactions(stored.reverse());
     }
     fetchData();
   }, [todayKey]);
@@ -31,7 +46,7 @@ export default function App() {
   const handleAddTransaction = async (transaction) => {
     const newTx = { ...transaction, dayKey: todayKey };
     await addTransaction(newTx);
-    setTransactions((prev) => [...prev, newTx]);
+    setTransactions((prev) => [newTx, ...prev]);
   };
 
   return (
@@ -40,7 +55,11 @@ export default function App() {
       <InstallButton />
       <BalanceSummary transactions={transactions} />
       <TransactionForm onAdd={handleAddTransaction} />
-      <TransactionList transactions={transactions} />
+      <TransactionList
+        transactions={transactions.filter((t) => t.dayKey === todayKey)}
+      />
+
+      <DebtsList />
       <ExportPDF transactions={transactions} />
       <ToastContainer
         position="top-right"
@@ -49,7 +68,6 @@ export default function App() {
         newestOnTop={false}
         closeOnClick
         rtl={false}
-        pauseOnFocusLoss
         draggable
         pauseOnHover
         theme="light"

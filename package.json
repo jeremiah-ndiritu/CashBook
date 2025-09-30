@@ -13,6 +13,7 @@
     "idb": "^8.0.3",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
+    "libphonenumber-js": "^1.12.23",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-toastify": "^11.0.5"
