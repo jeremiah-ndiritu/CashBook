@@ -50,6 +50,7 @@ export default function App() {
   const handleAddTransaction = async (transaction) => {
     const newTx = { ...transaction, dayKey: todayKey };
     let debt = await addTransaction(newTx);
+    debt=normalizeDebt(debt)
     setTransactions((prev) => [newTx, ...prev]);
     setDebts((prev) => [debt, ...prev]);
   };
