@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "../styles/ExportPDF.css";
 
-import { getLocalDateKey } from "../utils/utils";
+import { getLocalDateKey, getLocalDateTimeKey } from "../utils/utils";
 export default function ExportPDF({ transactions, debts }) {
   const [reportType, setReportType] = useState("today");
 
@@ -61,7 +61,7 @@ export default function ExportPDF({ transactions, debts }) {
     if (filtered.length === 0) {
       doc.setFontSize(14);
       doc.text("No transactions found for this report.", 14, 50);
-      doc.save(`cashbook-report-${getLocalDateKey()}.pdf`);
+      doc.save(`cashbook-report-${getLocalDateTimeKey()}.pdf`);
       return;
     }
 
@@ -208,7 +208,7 @@ export default function ExportPDF({ transactions, debts }) {
       }
     }
 
-    doc.save(`cashbook-report-${getLocalDateKey()}.pdf`);
+    doc.save(`cashbook-report-${getLocalDateTimeKey()}.pdf`);
   };
 
   return (
