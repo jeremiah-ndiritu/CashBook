@@ -172,7 +172,7 @@ export default function ExportPDF({ transactions, debts }) {
         const finalY = doc.lastAutoTable.finalY + 10;
 
         const totalExpectedIncome = debts
-          .filter((d) => d.type === "income" && d.amountOwed != null)
+          .filter((d) => d?.type === "income" && d.amountOwed != null)
           .reduce((sum, d) => sum + d.amountOwed, 0);
 
         const totalExpectedExpense = debts

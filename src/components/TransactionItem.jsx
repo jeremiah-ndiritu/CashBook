@@ -60,7 +60,11 @@ export default function TransactionItem({ transaction }) {
             </p>
           )}
 
-          <button className="close-btn" onClick={() => setIsOpen(false)}>
+          <button
+            className="close-btn"
+            id="cbtninti"
+            onClick={() => setIsOpen(false)}
+          >
             Close
           </button>
         </div>

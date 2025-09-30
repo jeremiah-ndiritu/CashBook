@@ -54,7 +54,8 @@
 }
 
 /* Optional button styling */
-.close-btn {
+#cbtninti.close-btn {
+  position: relative;
   margin-top: 20px;
   background: #222;
   color: #fff;
