@@ -54,10 +54,10 @@ export default function BalanceSummary({ transactions }) {
               🔻 Outgoing debts: <b>Ksh {ts.unpaidExpense}</b> (you owe this
               much).
               <br />
-              🔺 Incoming debts: <b>Ksh {ts.unpaidIncome}</b> (others owe you
-              this much).
+              🔺 Incoming debts: <b>Ksh {Math.abs(ts.unpaidIncome)}</b> (others
+              owe you this much).
             </p>
-            <p>Basically, balance sheet vibes: pay some, collect some. 🧾</p>
+            <p>Make sure you pay the debts you owe to others. 🧾</p>
           </>
         );
 
@@ -140,7 +140,7 @@ export default function BalanceSummary({ transactions }) {
           <h4>Total Debts Today</h4>
           <p style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
             <span>(Out) - {ts.unpaidExpense}</span>
-            <span>(In) + {ts.unpaidIncome}</span>
+            <span>(In) + {Math.abs(ts.unpaidIncome)}</span>
           </p>
         </div>
 
