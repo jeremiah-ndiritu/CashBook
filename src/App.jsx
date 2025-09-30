@@ -11,6 +11,7 @@ import InstallButton from "./components/InstallButton";
 import DebtsList from "./components/DebtsList";
 
 import "./App.css"; // import our custom css
+import UpdateButton from "./components/UpdateButton";
 // Get today's date key (YYYY-MM-DD)
 function getTodayKey() {
   const now = new Date();
@@ -54,6 +55,7 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <UpdateButton />
       <h1>Cashbook 📒 ({todayKey})</h1>
       <InstallButton />
       <BalanceSummary transactions={transactions} />
