@@ -33,7 +33,7 @@ export default function BalanceSummary({ transactions }) {
       <div className="balance-card">
         <h4>Total Debts Today</h4>
         <p style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-          <span>- {debtExpense}</span> <span>+ {creditIncome}</span>
+          <span>(Out) - {debtExpense}</span> <span>(In) + {creditIncome}</span>
         </p>
       </div>
       <div className="balance-card">
