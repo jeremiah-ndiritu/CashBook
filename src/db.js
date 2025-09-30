@@ -33,7 +33,7 @@ export async function addTransaction(transaction) {
   await db.add(STORE_TRANSACTIONS, transaction);
 
   // If credit is partial or unpaid, save debt info
-  if (transaction.credit && transaction.credit !== "full") {
+  if (transaction.paymentStatus && transaction.paymentStatus !== "paid") {
     const debt = {
       transactionId: transaction.id,
       debtorName: transaction.debtorName || null,
