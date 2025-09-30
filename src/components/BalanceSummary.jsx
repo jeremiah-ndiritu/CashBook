@@ -1,51 +1,177 @@
 // src/components/BalanceSummary.jsx
+import { useState } from "react";
+import Modal from "react-modal";
 import "../styles/BalanceSummary.css";
 import { getLocalDateKey } from "../utils/utils";
+import { getTransactionsStatistics } from "../utils/balance";
+
+Modal.setAppElement("#root");
+
 export default function BalanceSummary({ transactions }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+
   const now = new Date();
   const todayKey = getLocalDateKey(now);
-  transactions = transactions.filter((t) => t.dayKey == todayKey);
+  transactions = transactions.filter((t) => t.dayKey === todayKey);
 
-  const paidIncome = transactions
-    .filter((t) => t.type === "income" && t.paymentStatus === "paid")
-    .reduce((acc, t) => acc + t.amount, 0);
+  const ts = getTransactionsStatistics(transactions);
 
-  const creditIncome = transactions
-    .filter((t) => t.type === "income" && t.paymentStatus !== "paid")
-    .reduce((acc, t) => acc + (t.amount - t.deposit), 0);
+  const handleOpen = (type) => {
+    setModalType(type);
+    setIsOpen(true);
+  };
 
-  const paidExpense = transactions
-    .filter((t) => t.type === "expense" && t.paymentStatus === "paid")
-    .reduce((acc, t) => acc + t.amount, 0);
+  const renderModalContent = () => {
+    switch (modalType) {
+      case "income":
+        return (
+          <>
+            <h2>💰 Total Income Today</h2>
+            <p>Here’s the breakdown of where the money flowed in:</p>
+            <ul>
+              {Object.entries(ts.accountBalances).map(([method, balance]) =>
+                balance > 0 ? (
+                  <li key={method}>
+                    {method}: <b>Ksh {balance.toFixed(2)}</b>
+                  </li>
+                ) : null
+              )}
+            </ul>
+            <p>
+              🔥 In total, you pulled in{" "}
+              <b>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</b>. Keep
+              stacking that paper! 🚀
+            </p>
+          </>
+        );
 
-  const debtExpense = transactions
-    .filter((t) => t.type === "expense" && t.paymentStatus !== "paid")
-    .reduce((acc, t) => acc + t.amount, 0);
+      case "debts":
+        return (
+          <>
+            <h2>📉 Total Debts Today</h2>
+            <p>
+              🔻 Outgoing debts: <b>Ksh {ts.unpaidExpense}</b> (you owe this
+              much).
+              <br />
+              🔺 Incoming debts: <b>Ksh {ts.unpaidIncome}</b> (others owe you
+              this much).
+            </p>
+            <p>Basically, balance sheet vibes: pay some, collect some. 🧾</p>
+          </>
+        );
 
-  const realBalance = paidIncome - paidExpense;
+      case "expenses":
+        return (
+          <>
+            <h2>💸 Total Expenses Today</h2>
+            <p>
+              You’ve spent{" "}
+              <b>Ksh {(ts.paidExpense + ts.expenseDeposits).toFixed(2)}</b>{" "}
+              today. Every shilling’s accounted for — keep flexing that
+              budgeting. 📊
+            </p>
+
+            <h3 style={{ marginTop: "1rem" }}>📝 Expense Breakdown</h3>
+            <ol style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
+              {transactions
+                .filter((t) => t.type === "expense")
+                .map((t) => (
+                  <li key={t.id} style={{ marginBottom: "0.6rem" }}>
+                    {t.description} — <b>Ksh {t.amount.toFixed(2)}</b>{" "}
+                    {t.paymentStatus === "paid" ? (
+                      <span style={{ color: "green" }}>(Paid in full)</span>
+                    ) : (
+                      <span style={{ color: "orange" }}>
+                        (Partial {t.deposit || 0} / Balance{" "}
+                        {t.amount - (t.deposit || 0)})
+                      </span>
+                    )}
+                  </li>
+                ))}
+            </ol>
+          </>
+        );
+
+      case "balance":
+        return (
+          <>
+            <h2>📊 Current Balance</h2>
+            <p>
+              {ts.realBalance >= 0 ? (
+                <>
+                  ✅ You’re up with <b>Ksh {ts.realBalance.toFixed(2)}</b> left.
+                  Chill and shine ✨
+                </>
+              ) : (
+                <>
+                  ⚠ Red alert… you’re down by{" "}
+                  <b>Ksh {Math.abs(ts.realBalance).toFixed(2)}</b>. Maybe slow
+                  down the spending 👀
+                </>
+              )}
+            </p>
+
+            <h3 style={{ marginTop: "1.2rem" }}>💼 Breakdown per account</h3>
+            <ul style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
+              {Object.entries(ts.accountBalances).map(([method, balance]) => (
+                <li key={method}>
+                  {method}: <b>Ksh {balance.toFixed(2)}</b>
+                </li>
+              ))}
+            </ul>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="balance-summary-grid">
-      <div className="balance-card">
-        <h4>Total Income Today</h4>
-        <p>Ksh {paidIncome.toFixed(2)}</p>
+    <>
+      <div className="balance-summary-grid">
+        <div className="balance-card" onClick={() => handleOpen("income")}>
+          <h4>Total Income Today</h4>
+          <p>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</p>
+        </div>
+
+        <div className="balance-card" onClick={() => handleOpen("debts")}>
+          <h4>Total Debts Today</h4>
+          <p style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+            <span>(Out) - {ts.unpaidExpense}</span>
+            <span>(In) + {ts.unpaidIncome}</span>
+          </p>
+        </div>
+
+        <div className="balance-card" onClick={() => handleOpen("expenses")}>
+          <h4>Total Expenses Today</h4>
+          <p>Ksh {ts.paidExpense.toFixed(2)}</p>
+        </div>
+
+        <div
+          className={`balance-card ${
+            ts.realBalance < 0 ? "balance-negative" : ""
+          }`}
+          onClick={() => handleOpen("balance")}
+        >
+          <h4>Current Balance</h4>
+          <p>Ksh {ts.realBalance.toFixed(2)}</p>
+        </div>
       </div>
-      <div className="balance-card">
-        <h4>Total Debts Today</h4>
-        <p style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-          <span>(Out) - {debtExpense}</span> <span>(In) + {creditIncome}</span>
-        </p>
-      </div>
-      <div className="balance-card">
-        <h4>Total Expenses Today</h4>
-        <p>Ksh {paidExpense.toFixed(2)}</p>
-      </div>
-      <div
-        className={`balance-card ${realBalance < 0 ? "balance-negative" : ""}`}
+
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        className="transaction-modal"
+        overlayClassName="modal-overlay"
+        closeTimeoutMS={300}
       >
-        <h4>Current Balance</h4>
-        <p>Ksh {realBalance.toFixed(2)}</p>
-      </div>
-    </div>
+        <button className="close-btn" onClick={() => setIsOpen(false)}>
+          ✖ Close
+        </button>
+        <div className="modal-body">{renderModalContent()}</div>
+      </Modal>
+    </>
   );
 }

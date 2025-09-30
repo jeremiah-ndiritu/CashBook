@@ -1,11 +1,53 @@
 // src/components/DebtsList.jsx
+import { useState } from "react";
+import Modal from "react-modal";
+import { toast } from "react-toastify";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import "../styles/DebtsList.css";
 
-export default function DebtsList({ debts }) {
-  if (debts.length === 0) {
+Modal.setAppElement("#root"); // accessibility
+
+export default function DebtsList({ debts, onUpdateDebt }) {
+  const [selectedDebt, setSelectedDebt] = useState(null);
+  const [newAmount, setNewAmount] = useState("");
+
+  if (!debts || debts.length === 0) {
     return <p className="no-debts">No debts recorded yet.</p>;
   }
+
+  const handleOpen = (debt) => {
+    setSelectedDebt(debt);
+    setNewAmount(""); // reset input each open
+  };
+
+  const handleClose = () => {
+    setSelectedDebt(null);
+  };
+
+  const handleUpdate = () => {
+    const amount = parseFloat(newAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid positive amount");
+      return;
+    }
+
+    if (amount > selectedDebt.amountOwed) {
+      toast.error("Deposit cannot exceed amount owed!");
+      return;
+    }
+
+    const updated = {
+      ...selectedDebt,
+      amountOwed: selectedDebt.amountOwed - amount,
+    };
+
+    if (onUpdateDebt) {
+      onUpdateDebt(updated);
+    }
+
+    toast.success("Debt updated successfully!");
+    handleClose();
+  };
 
   return (
     <div className="debts-table-wrapper">
@@ -21,13 +63,15 @@ export default function DebtsList({ debts }) {
           </tr>
         </thead>
         <tbody>
-          {(debts || []).map((d) => {
-            if (!d) return null; // skip undefined entries
+          {debts.map((d) => {
+            if (!d) return null;
 
-            const debtorName = d.debtorName || "-";
-            const debtorNumber = d.debtorNumber || "-";
-            const transactionId = d.transactionId || "-";
-            const amountOwed = d.amountOwed ? d.amountOwed.toFixed(2) : "0.00";
+            const debtorName = d?.debtorName || "-";
+            const debtorNumber = d?.debtorNumber || "-";
+            const transactionId = d?.transactionId || "-";
+            const amountOwed = d?.amountOwed
+              ? d?.amountOwed.toFixed(2)
+              : "0.00";
             const date = d.date ? new Date(d.date).toLocaleDateString() : "-";
 
             let formattedNumber = debtorNumber;
@@ -45,7 +89,11 @@ export default function DebtsList({ debts }) {
             }
 
             return (
-              <tr key={d.id || Math.random()}>
+              <tr
+                key={d?.transactionId || Math.random()}
+                onClick={() => handleOpen(d)}
+                className="debt-row"
+              >
                 <td>{debtorName}</td>
                 <td>
                   {debtorNumber !== "-" ? (
@@ -62,6 +110,56 @@ export default function DebtsList({ debts }) {
           })}
         </tbody>
       </table>
+
+      {/* Modal */}
+      <Modal
+        isOpen={!!selectedDebt}
+        onRequestClose={handleClose}
+        className="debt-modal"
+        overlayClassName="debt-overlay"
+      >
+        {selectedDebt && (
+          <div className="debt-modal-content">
+            <h2>Debt Details</h2>
+            <p>
+              <strong>Debtor:</strong> {selectedDebt.debtorName}
+            </p>
+            <p>
+              <strong>Phone:</strong> {selectedDebt.debtorNumber}
+            </p>
+            <p>
+              <strong>Transaction ID:</strong> {selectedDebt.transactionId}
+            </p>
+            <p>
+              <strong>Amount Owed:</strong>{" "}
+              {selectedDebt.amountOwed == 0
+                ? "cleared"
+                : selectedDebt.amountOwed?.toFixed(2)}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {new Date(selectedDebt.date).toLocaleDateString()}
+            </p>
+
+            {selectedDebt.amountOwed > 0 && (
+              <div className="debt-update">
+                <label>Deposit to reduce debt:</label>
+                <input
+                  type="number"
+                  placeholder="Enter amount"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                />
+                <button onClick={handleUpdate}>Update</button>
+              </div>
+            )}
+
+            <button className="close-btn" onClick={handleClose}>
+              Close
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

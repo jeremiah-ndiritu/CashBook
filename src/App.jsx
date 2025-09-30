@@ -12,6 +12,7 @@ import DebtsList from "./components/DebtsList";
 
 import "./App.css"; // import our custom css
 import UpdateButton from "./components/UpdateButton";
+import { normalizeDebt, normalizeTransaction } from "./utils/utils";
 // Get today's date key (YYYY-MM-DD)
 function getTodayKey() {
   const now = new Date();
@@ -38,8 +39,8 @@ export default function App() {
   }, [todayKey]);
   useEffect(() => {
     async function fetchData() {
-      const tsxs = await getTransactions();
-      const debts = await getDebts();
+      const tsxs = (await getTransactions()).map(normalizeTransaction);
+      const debts = (await getDebts()).map(normalizeDebt);
       setDebts(debts.reverse());
       setTransactions(tsxs.reverse());
     }
@@ -52,7 +53,13 @@ export default function App() {
     setTransactions((prev) => [newTx, ...prev]);
     setDebts((prev) => [debt, ...prev]);
   };
-
+  const handleUpdateDebt = (updatedDebt) => {
+    setDebts((prevDebts) =>
+      prevDebts.map((d) =>
+        d?.transactionId === updatedDebt.transactionId ? updatedDebt : d
+      )
+    );
+  };
   return (
     <div className="app-container">
       <UpdateButton />
@@ -64,7 +71,7 @@ export default function App() {
         transactions={transactions.filter((t) => t.dayKey === todayKey)}
       />
 
-      <DebtsList debts={debts} />
+      <DebtsList debts={debts} onUpdateDebt={handleUpdateDebt} />
       <ExportPDF transactions={transactions} debts={debts} />
       <ToastContainer
         position="top-right"

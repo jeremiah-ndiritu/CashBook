@@ -1,38 +1,167 @@
+/* Wrapper */
 .debts-table-wrapper {
-  margin: 20px 0;
-  overflow-x: auto;
+  margin-top: 1.5rem;
   background: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+  padding: 1rem;
 }
 
+.debts-table-wrapper h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+/* Table */
 .debts-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 0.95rem;
 }
 
 .debts-table th,
 .debts-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #ddd;
   text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #edf2f7;
 }
 
 .debts-table th {
-  background-color: #16a34a;
-  color: #fff;
+  background: #f7fafc;
   font-weight: 600;
+  color: #4a5568;
+  font-size: 0.85rem;
+  text-transform: uppercase;
 }
 
-.debts-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+.debt-row {
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
+.debt-row:hover {
+  background: #f0f9ff;
+}
+
+.debt-row td {
+  color: #2d3748;
+}
+
+/* No debts message */
 .no-debts {
-  padding: 10px;
-  color: #555;
-  text-align: center;
+  color: #718096;
   font-style: italic;
+  padding: 1rem;
+}
+
+/* ========= MODAL ========= */
+
+/* Overlay backdrop */
+.debt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 9;
+  display: flex;
+  align-items: flex-end; /* push modal to bottom */
+}
+
+/* Bottom sheet modal */
+.debt-modal {
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 1.5rem;
+  width: 100%;
+  height: 90%;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+/* Title */
+.debt-modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+/* Modal details */
+.debt-modal-content p {
+  margin: 0.5rem 0;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+/* Update section */
+.debt-update {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.debt-update label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.debt-update input {
+  padding: 0.6rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.debt-update input:focus {
+  border-color: #3182ce;
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.3);
+}
+
+/* Buttons */
+.debt-update button,
+.close-btn {
+  background: #3182ce;
+  color: white;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.debt-update button:hover {
+  background: #2b6cb0;
+}
+
+.close-btn {
+  margin-top: 1rem;
+  width: 100%;
+  background: #e53e3e;
+}
+
+.close-btn:hover {
+  background: #c53030;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
