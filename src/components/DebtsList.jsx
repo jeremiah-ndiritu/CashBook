@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { toast } from "react-toastify";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import "../styles/DebtsList.css";
+import { timeAgo } from "../utils/utils";
 
 Modal.setAppElement("#root"); // accessibility
 
@@ -73,7 +74,9 @@ export default function DebtsList({ debts, onUpdateDebt }) {
             const amountOwed = d?.amountOwed
               ? d?.amountOwed.toFixed(2)
               : "0.00";
-            const date = d.date ? new Date(d.date).toLocaleDateString() : "-";
+            const date = d.date
+              ? new Date(d.date).toLocaleDateString()
+              : new Date().toLocaleDateString();
 
             let formattedNumber = debtorNumber;
             if (debtorNumber !== "-" && debtorNumber !== null) {
@@ -91,7 +94,7 @@ export default function DebtsList({ debts, onUpdateDebt }) {
 
             return (
               <tr
-                key={d?.transactionId || Math.random()}
+                key={d?.transactionId + Math.random() || Math.random()}
                 onClick={() => handleOpen(d)}
                 className="debt-row"
               >
@@ -105,7 +108,12 @@ export default function DebtsList({ debts, onUpdateDebt }) {
                 </td>
                 <td>{transactionId}</td>
                 <td>{amountOwed}</td>
-                <td>{date}</td>
+                <td style={{ display: "flex", flexDirection: "column" }}>
+                  <span>{date}</span>
+                  <span style={{ fill: "gray", fontSize: "0.75rem" }}>
+                    {timeAgo(d.date)}
+                  </span>
+                </td>
               </tr>
             );
           })}

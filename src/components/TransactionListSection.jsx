@@ -3,7 +3,7 @@ import PaginationContainer from "./PaginationContainer";
 import TransactionList from "./TransactionList";
 import { getPage, getStoreCount } from "../db";
 
-export default function TransactionListSection() {
+export default function TransactionListSection({ refresh }) {
   const PAGE_SIZE = 5;
 
   const [transactions, setTransactions] = useState([]);
@@ -17,7 +17,7 @@ export default function TransactionListSection() {
       setTotalPages(Math.ceil(count / PAGE_SIZE) || 1);
     };
     fetchTotalPages();
-  }, []);
+  }, [refresh]);
 
   // fetch current page data
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function TransactionListSection() {
       setTransactions(data);
     };
     fetchPage();
-  }, [currentPage]);
+  }, [currentPage, refresh]);
 
   return (
     <div className="tl-section">

@@ -41,7 +41,7 @@ export default function BalanceSummary({ transactions }) {
             <p>
               🔥 In total, you pulled in{" "}
               <b>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</b>. Keep
-              stacking that paper! 🚀
+              working! 🚀 May God bless the work of your hands
             </p>
           </>
         );
@@ -90,6 +90,11 @@ export default function BalanceSummary({ transactions }) {
                   </li>
                 ))}
             </ol>
+            <p>
+              You still need to pay Ksh {ts.unpaidExpense} to whoever you owe a
+              debt. So you'll have spent a total of Ksh{" "}
+              {ts.paidExpense + ts.unpaidExpense}
+            </p>
           </>
         );
 
@@ -98,7 +103,13 @@ export default function BalanceSummary({ transactions }) {
           <>
             <h2>📊 Current Balance</h2>
             <p>
-              {ts.realBalance >= 0 ? (
+              {ts.realBalance == 0 && (
+                <>
+                  😎No problem. You have no Ksh 0.00 left. Keep pushing. Never
+                  lose hope, God will make a way
+                </>
+              )}
+              {ts.realBalance > 0 ? (
                 <>
                   ✅ You’re up with <b>Ksh {ts.realBalance.toFixed(2)}</b> left.
                   Chill and shine ✨
@@ -112,14 +123,26 @@ export default function BalanceSummary({ transactions }) {
               )}
             </p>
 
-            <h3 style={{ marginTop: "1.2rem" }}>💼 Breakdown per account</h3>
-            <ul style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
-              {Object.entries(ts.accountBalances).map(([method, balance]) => (
-                <li key={method}>
-                  {method}: <b>Ksh {balance.toFixed(2)}</b>
-                </li>
-              ))}
-            </ul>
+            {ts.realBalance > 0 && (
+              <>
+                {
+                  <>
+                    <h3 style={{ marginTop: "1.2rem" }}>
+                      💼 Breakdown per account
+                    </h3>
+                    <ul style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
+                      {Object.entries(ts.accountBalances).map(
+                        ([method, balance]) => (
+                          <li key={method}>
+                            {method}: <b>Ksh {balance.toFixed(2)}</b>
+                          </li>
+                        )
+                      )}
+                    </ul>{" "}
+                  </>
+                }
+              </>
+            )}
           </>
         );
 

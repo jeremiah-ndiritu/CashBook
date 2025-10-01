@@ -17,8 +17,8 @@ import DebtsList from "./components/DebtsList";
 
 import "./App.css"; // import our custom css
 import UpdateButton from "./components/UpdateButton";
-import { normalizeDebt } from "./utils/utils";
 import TransactionListSection from "./components/TransactionListSection";
+import DebtsSection from "./components/DebtsSection";
 // Get today's date key (YYYY-MM-DD)
 function getTodayKey() {
   const now = new Date();
@@ -32,6 +32,8 @@ export default function App() {
   const [transactions, setTransactions] = useState([]);
   const [debts, setDebts] = useState([]);
   const [todayKey, setTodayKey] = useState(getTodayKey());
+  const [refreshTsxs, setRefreshTsxs] = useState(false);
+  const [refreshDebts, setRefreshDebts] = useState(false);
 
   // Reload todayKey every minute so if date changes, it updates
   useEffect(() => {
@@ -57,21 +59,26 @@ export default function App() {
     const newTx = { ...transaction, dayKey: todayKey };
     let debt = await addTransaction(newTx);
     if (debt) {
-      debt = normalizeDebt(debt);
-      debt && setDebts((prev) => [debt, ...prev]);
+      setRefreshDebts(!refreshDebts);
+      setDebts((prev) => [debt, ...prev]);
     }
+
+    setRefreshTsxs(!refreshTsxs);
     setTransactions((prev) => [newTx, ...prev]);
   };
   const handleUpdateDebt = async (updatedDebt) => {
-    setDebts((prevDebts) =>
-      prevDebts.map((d) =>
-        d?.transactionId === updatedDebt.transactionId ? updatedDebt : d
-      )
-    );
-
     try {
       let r = await updateDebtInDB(updatedDebt); // custom helper
-      toast.success(`Debt ${r?.transactionId}updated successfully!`);
+      console.log("r :>> ", r);
+      if (r) {
+        setDebts((prevDebts) =>
+          prevDebts.map((d) =>
+            d?.transactionId === updatedDebt.transactionId ? updatedDebt : d
+          )
+        );
+        setRefreshDebts(!refreshDebts);
+        toast.success(`Debt ${r?.transactionId || r?.id}updated successfully!`);
+      }
     } catch (err) {
       toast.error("Failed to update debt!");
       console.log("err updating debt :>> ", err);
@@ -87,9 +94,11 @@ export default function App() {
       {/* <TransactionList
         transactions={transactions.filter((t) => t.dayKey === todayKey)}
       /> */}
-      <TransactionListSection />
+      <TransactionListSection refresh={refreshTsxs} />
+      <DebtsSection onUpdateDebt={handleUpdateDebt} refresh={refreshDebts} />
 
-      <DebtsList debts={debts} onUpdateDebt={handleUpdateDebt} />
+      {/* <DebtsList debts={debts} onUpdateDebt={handleUpdateDebt} /> */}
+
       <ExportPDF transactions={transactions} debts={debts} />
       <ToastContainer
         position="top-right"

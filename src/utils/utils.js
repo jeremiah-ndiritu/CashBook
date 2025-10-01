@@ -35,9 +35,10 @@ export function normalizeTransaction(t) {
 
 export function normalizeDebt(d) {
   return {
-    transactionId: d.id || Date.now(),
+    transactionId: d.transactionId || Date.now(),
     debtorName: d.debtorName || "-",
     debtorNumber: d.debtorNumber || "-",
+    amountBilled: d.amountBilled || 0,
     amountOwed: d.amountOwed || 0,
     type: d.type || "income",
     date: d.date || new Date().toISOString(),

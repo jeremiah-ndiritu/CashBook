@@ -23,7 +23,8 @@ export function getTransactionsStatistics(transactions) {
     .reduce((acc, t) => acc + (t.amount - (t.deposit || 0)), 0);
 
   // Cash-only snapshot (strictly what’s actually paid now)
-  const realBalance = paidIncome - paidExpense;
+  const realBalance =
+    paidIncome + incomeDeposits - expenseDeposits - paidExpense;
 
   // Future-looking: what it would be if everyone paid up & all debts settled
   const expectedBalance =
@@ -40,6 +41,8 @@ export function getTransactionsStatistics(transactions) {
       acc[method] += t.deposit || 0;
     } else if (t.type === "expense" && t.paymentStatus === "paid") {
       acc[method] -= t.amount;
+    } else if (t.type === "expense" && t.paymentStatus === "partial") {
+      acc[method] += t.deposit || 0;
     }
     // (Skipping partial expense deposits for now, since your schema doesn’t use them)
     return acc;

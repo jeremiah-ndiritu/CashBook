@@ -1,6 +1,7 @@
 // src/db.js
 import { openDB } from "idb";
 import { normalizeDebt, normalizeTransaction } from "./utils/utils";
+import { toast } from "react-toastify";
 
 const DB_NAME = "cashbook-db";
 const STORE_TRANSACTIONS = "transactions";
@@ -37,18 +38,19 @@ export async function addTransaction(transaction) {
 
   // If credit is partial or unpaid, save debt info
   if (transaction.paymentStatus && transaction.paymentStatus !== "paid") {
-    const debt = {
+    const debt = normalizeDebt({
       transactionId: transaction.id,
       debtorName: transaction.debtorName || null,
       debtorNumber: transaction.debtorNumber || null,
       type: transaction.type,
+      amountBilled: transaction.amount,
       amountOwed:
-        transaction.credit === "partial"
+        transaction.credit == "partial"
           ? transaction.amount - transaction.deposit
           : transaction.amount,
       date: transaction.date,
-    };
-    debt && (await addDebt(debt));
+    });
+    await addDebt(debt);
     return debt || null;
   }
 }
@@ -58,6 +60,16 @@ export async function getTransactions() {
   return (await db.getAll(STORE_TRANSACTIONS)).map(normalizeTransaction);
 }
 
+export async function getTransaction(id = Date.now()) {
+  const db = await initDB();
+  let t = await db.get(STORE_TRANSACTIONS, id);
+  return t || {};
+}
+export async function getDebt(id = Date.now()) {
+  const db = await initDB();
+  let t = await db.get(STORE_DEBTS, id);
+  return t || {};
+}
 // Debts
 export async function addDebt(debt) {
   const db = await initDB();
@@ -75,8 +87,10 @@ export async function updateDebtInDB(updatedDebt) {
   const index = store.index("transactionId");
 
   // Step 1: Look up by transactionId
-  const existing = await index.get(updatedDebt.transactionId);
+  const existing = await index.get(updatedDebt?.transactionId);
+  console.log("existing :>> ", existing);
   if (!existing) {
+    toast.warn("No debt found!");
     console.warn(
       "No debt found with transactionId:",
       updatedDebt.transactionId
@@ -91,7 +105,7 @@ export async function updateDebtInDB(updatedDebt) {
   await store.put(updatedDebt);
 
   await tx.done;
-  return updatedDebt; // nice to return the fresh object
+  return normalizeDebt(updatedDebt); // nice to return the fresh object
 }
 export async function getStoreCount(storeName) {
   const db = await initDB();
