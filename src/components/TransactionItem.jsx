@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../styles/TransactionItem.css";
 import Modal from "react-modal";
+import { timeAgo } from "../utils/utils";
 
 Modal.setAppElement("#root");
 
@@ -24,6 +25,7 @@ export default function TransactionItem({ transaction }) {
         <span className="transaction-amount">
           {transaction.type === "income" ? "+" : "-"} Ksh {transaction.amount}
         </span>
+        <div className="time-ago">{timeAgo(transaction.date)}</div>
       </li>
 
       <Modal

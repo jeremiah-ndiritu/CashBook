@@ -30,7 +30,7 @@ export default function TransactionListSection() {
 
   return (
     <div className="tl-section">
-      <h2>Page {currentPage}</h2>
+      <h2>Transactions - Page {currentPage}</h2>
       <TransactionList transactions={transactions} />
       <PaginationContainer
         currentPage={currentPage}

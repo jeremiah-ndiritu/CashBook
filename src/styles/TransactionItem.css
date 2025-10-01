@@ -1,5 +1,6 @@
 /* src/styles/TransactionItem.css */
 .transaction-item {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -9,6 +10,13 @@
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: transform 0.1s ease;
+}
+.time-ago {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #888;
 }
 
 .transaction-item:hover {
