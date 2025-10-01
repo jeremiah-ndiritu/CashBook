@@ -45,7 +45,7 @@ export async function addTransaction(transaction) {
       type: transaction.type,
       amountBilled: transaction.amount,
       amountOwed:
-        transaction.credit == "partial"
+        transaction.paymentStatus == "partial"
           ? transaction.amount - transaction.deposit
           : transaction.amount,
       date: transaction.date,
@@ -60,15 +60,17 @@ export async function getTransactions() {
   return (await db.getAll(STORE_TRANSACTIONS)).map(normalizeTransaction);
 }
 
-export async function getTransaction(id = Date.now()) {
+export async function getTransaction(id) {
+  if (!id) return null;
   const db = await initDB();
-  let t = await db.get(STORE_TRANSACTIONS, id);
-  return t || {};
+  const ts = await db.get(STORE_TRANSACTIONS, id);
+  return ts || null;
 }
-export async function getDebt(id = Date.now()) {
+export async function getDebt(id) {
+  if (!id) return null;
   const db = await initDB();
-  let t = await db.get(STORE_DEBTS, id);
-  return t || {};
+  const debt = await db.get(STORE_DEBTS, id);
+  return debt || null;
 }
 // Debts
 export async function addDebt(debt) {

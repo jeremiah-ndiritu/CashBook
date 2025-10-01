@@ -5,13 +5,14 @@ import { toast } from "react-toastify";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import "../styles/DebtsList.css";
 import { timeAgo } from "../utils/utils";
-
+import { getDebtsStatistics } from "../utils/balance";
 Modal.setAppElement("#root"); // accessibility
 
 export default function DebtsList({ debts, onUpdateDebt }) {
   const [selectedDebt, setSelectedDebt] = useState(null);
   const [newAmount, setNewAmount] = useState("");
-
+  const ds = getDebtsStatistics(debts);
+  console.log("ds :>> ", ds);
   if (!debts || debts.length === 0) {
     return <p className="no-debts">No debts recorded yet.</p>;
   }
@@ -138,6 +139,9 @@ export default function DebtsList({ debts, onUpdateDebt }) {
             </p>
             <p>
               <strong>Transaction ID:</strong> {selectedDebt.transactionId}
+            </p>
+            <p>
+              <strong>Amount Billed:</strong> {selectedDebt?.amountBilled}
             </p>
             <p>
               <strong>Amount Owed:</strong>{" "}

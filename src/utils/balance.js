@@ -60,3 +60,49 @@ export function getTransactionsStatistics(transactions) {
     accountBalances,
   };
 }
+
+export function getDebtsStatistics(debts) {
+  // Fully cleared debts
+  const clearedDebts = debts
+    .filter((d) => d.amountOwed === 0)
+    .reduce((acc, d) => acc + (d.amountBilled || 0), 0);
+
+  // Partial payments (amountOwed < amountBilled)
+  const partialDebts = debts
+    .filter(
+      (d) =>
+        d.amountOwed > 0 && (d.amountBilled || d.amountOwed) - d.amountOwed > 0
+    )
+    .reduce(
+      (acc, d) => acc + ((d.amountBilled || d.amountOwed) - d.amountOwed),
+      0
+    );
+
+  // Outstanding debts (still owed)
+  const unpaidDebts = debts
+    .filter((d) => d.amountOwed > 0)
+    .reduce((acc, d) => acc + d.amountOwed, 0);
+
+  // Expected fully collected = cleared + partial + unpaid
+  const expectedDebts = debts.reduce(
+    (acc, d) => acc + (d.amountBilled || d.amountOwed),
+    0
+  );
+
+  // Optional: per-debtor breakdown
+  const debtorBalances = debts.reduce((acc, d) => {
+    const name = d.debtorName || "Unknown";
+    if (!acc[name]) acc[name] = 0;
+    acc[name] += d.amountOwed;
+    return acc;
+  }, {});
+
+  return {
+    clearedDebts,
+    partialDebts,
+    unpaidDebts,
+    expectedDebts,
+    debtorBalances,
+    totalDebt: clearedDebts + partialDebts + unpaidDebts,
+  };
+}
