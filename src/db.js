@@ -1,12 +1,15 @@
 // src/db.js
 import { openDB } from "idb";
+import { normalizeDebt, normalizeTransaction } from "./utils/utils";
 
 const DB_NAME = "cashbook-db";
 const STORE_TRANSACTIONS = "transactions";
 const STORE_DEBTS = "debts";
 
+const DB_VERSION = 2;
+
 export async function initDB() {
-  return openDB(DB_NAME, 2, {
+  return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       // Create transactions store if it doesn't exist
       if (!db.objectStoreNames.contains(STORE_TRANSACTIONS)) {
@@ -45,14 +48,14 @@ export async function addTransaction(transaction) {
           : transaction.amount,
       date: transaction.date,
     };
-    await addDebt(debt);
-    return debt;
+    debt && (await addDebt(debt));
+    return debt || null;
   }
 }
 
 export async function getTransactions() {
   const db = await initDB();
-  return db.getAll(STORE_TRANSACTIONS);
+  return (await db.getAll(STORE_TRANSACTIONS)).map(normalizeTransaction);
 }
 
 // Debts
@@ -63,5 +66,59 @@ export async function addDebt(debt) {
 
 export async function getDebts() {
   const db = await initDB();
-  return db.getAll(STORE_DEBTS);
+  return (await db.getAll(STORE_DEBTS)).map(normalizeDebt);
+}
+export async function updateDebtInDB(updatedDebt) {
+  const db = await openDB(DB_NAME, 2);
+  const tx = db.transaction(STORE_DEBTS, "readwrite");
+  const store = tx.objectStore(STORE_DEBTS);
+  const index = store.index("transactionId");
+
+  // Step 1: Look up by transactionId
+  const existing = await index.get(updatedDebt.transactionId);
+  if (!existing) {
+    console.warn(
+      "No debt found with transactionId:",
+      updatedDebt.transactionId
+    );
+    return null; // fail gracefully
+  }
+
+  // Step 2: Carry forward the id
+  updatedDebt.id = existing.id;
+
+  // Step 3: Save back
+  await store.put(updatedDebt);
+
+  await tx.done;
+  return updatedDebt; // nice to return the fresh object
+}
+export async function getStoreCount(storeName) {
+  const db = await initDB();
+  const tx = db.transaction(storeName, "readonly");
+  const store = tx.objectStore(storeName);
+  const count = await store.count();
+  await tx.done;
+  return count;
+}
+export async function getPage(
+  storeName = "transactions",
+  page = 1,
+  pageSize = 10
+) {
+  const db = await initDB();
+  const tx = db.transaction(storeName, "readonly");
+  const store = tx.objectStore(storeName);
+
+  // get all records
+  const all = await store.getAll();
+
+  // newest first
+  const reversed = all.reverse();
+
+  // calculate start/end
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+
+  return reversed.slice(start, end);
 }

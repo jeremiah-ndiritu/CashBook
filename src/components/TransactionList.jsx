@@ -3,7 +3,7 @@ import TransactionItem from "./TransactionItem";
 import "../styles/TransactionList.css";
 
 export default function TransactionList({ transactions }) {
-  if (transactions.length === 0) {
+  if (!transactions || transactions.length === 0) {
     return <p className="no-transactions">No transactions yet.</p>;
   }
 

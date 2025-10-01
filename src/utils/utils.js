@@ -41,5 +41,7 @@ export function normalizeDebt(d) {
     amountOwed: d.amountOwed || 0,
     type: d.type || "income",
     date: d.date || new Date().toISOString(),
+    status: d?.amountOwed == 0 ? "cleared" : "pending",
+    clearedAt: d?.clearedAt || "Not cleared",
   };
 }

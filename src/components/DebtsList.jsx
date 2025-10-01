@@ -43,9 +43,10 @@ export default function DebtsList({ debts, onUpdateDebt }) {
 
     if (onUpdateDebt) {
       onUpdateDebt(updated);
+    } else {
+      toast.warn("Debt was not altered!");
     }
 
-    toast.success("Debt updated successfully!");
     handleClose();
   };
 

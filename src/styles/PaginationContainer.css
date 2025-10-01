@@ -1,0 +1,23 @@
+.pagination-container {
+  display: flex;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.pgn-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pgn-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pgn-btn.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}

@@ -34,7 +34,6 @@ export default function ExportPDF({ transactions, debts }) {
     }
     return [];
   };
-
   const generatePDF = (mode = "full") => {
     const filtered = filterTransactions();
     const doc = new jsPDF();
