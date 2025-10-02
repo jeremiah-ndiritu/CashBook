@@ -1,18 +1,31 @@
 // src/components/DebtsList.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { toast } from "react-toastify";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import "../styles/DebtsList.css";
 import { timeAgo } from "../utils/utils";
 import { getDebtsStatistics } from "../utils/balance";
+import { join } from "../db";
 Modal.setAppElement("#root"); // accessibility
 
 export default function DebtsList({ debts, onUpdateDebt }) {
   const [selectedDebt, setSelectedDebt] = useState(null);
   const [newAmount, setNewAmount] = useState("");
+  const [tsds, setTsDs] = useState([]);
   const ds = getDebtsStatistics(debts);
-  console.log("ds :>> ", ds);
+  ds;
+  useEffect(() => {
+    const getTsds = async () => {
+      let j = await join({
+        stores: ["transactions", "debts"],
+        column: "transactionId",
+      });
+      setTsDs(j);
+    };
+    getTsds();
+  }, []);
+  tsds;
   if (!debts || debts.length === 0) {
     return <p className="no-debts">No debts recorded yet.</p>;
   }
@@ -38,10 +51,19 @@ export default function DebtsList({ debts, onUpdateDebt }) {
       return;
     }
 
-    const updated = {
+    let updated = {
       ...selectedDebt,
       amountOwed: selectedDebt.amountOwed - amount,
     };
+    if (!updated.history) {
+      updated.history = [];
+    }
+    updated.history.push({
+      deposit: amount,
+      balance: selectedDebt.amountOwed - amount,
+      method: "",
+      date: Date.now(),
+    });
 
     if (onUpdateDebt) {
       onUpdateDebt(updated);
@@ -164,6 +186,20 @@ export default function DebtsList({ debts, onUpdateDebt }) {
                   onChange={(e) => setNewAmount(e.target.value)}
                 />
                 <button onClick={handleUpdate}>Update</button>
+              </div>
+            )}
+            {/* ===== HISTORY SECTION ===== */}
+            {selectedDebt.history?.length > 0 && (
+              <div className="debt-history" style={{ marginTop: "20px" }}>
+                <h3>History</h3>
+                {selectedDebt.history.map((h, index) => (
+                  <p key={index}>
+                    {index + 1}. Paid {h.deposit} via {h.method} on{" "}
+                    {new Date(h.date).toLocaleDateString() || "date"}{" "}
+                    {new Date(h.date).toLocaleTimeString() || "date2"} — balance{" "}
+                    {h.balance}
+                  </p>
+                ))}
               </div>
             )}
 

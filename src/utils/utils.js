@@ -19,31 +19,39 @@ export function getLocalDateTimeKey(date = new Date()) {
 
 export function normalizeTransaction(t) {
   return {
-    id: t.id || Date.now(),
-    dayKey: t.dayKey,
-    description: t.description || "",
-    amount: t.amount || 0,
-    paymentMethod: t.paymentMethod || "N/A",
-    type: t.type || "income",
-    paymentStatus: t.paymentStatus || "paid", // default if missing
-    deposit: t.deposit ?? (t.amount || 0), // fallback to amount
-    debtorName: t.debtorName || null,
-    debtorNumber: t.debtorNumber || null,
-    date: t.date || new Date().toISOString(),
+    id: t?.id || t?.transactionId || Date.now(),
+    dayKey: t?.dayKey,
+    description: t?.description || "",
+    amount: t?.amount || 0,
+    paymentMethod: t?.paymentMethod || "N/A",
+    type: t?.type || "income",
+    paymentStatus: t?.paymentStatus || "paid", // default if missing
+    deposit: t?.deposit ?? (t?.amount || 0), // fallback to amount
+    debtorName: t?.debtorName || null,
+    debtorNumber: t?.debtorNumber || null,
+    date: t?.date || new Date().toISOString(),
   };
 }
 
 export function normalizeDebt(d) {
   return {
     transactionId: d.transactionId || Date.now(),
-    debtorName: d.debtorName || "-",
-    debtorNumber: d.debtorNumber || "-",
+    debtorName: String(d.debtorName) || "-",
+    debtorNumber: String(d.debtorNumber) || "-",
     amountBilled: d.amountBilled || 0,
     amountOwed: d.amountOwed || 0,
-    type: d.type || "income",
+    type: String(d.type) || "income",
     date: d.date || new Date().toISOString(),
     status: d?.amountOwed == 0 ? "cleared" : "pending",
     clearedAt: d?.clearedAt || "Not cleared",
+    history: [
+      {
+        deposit: d?.deposit || 0,
+        method: "",
+        balance: d?.amountOwed,
+        date: d?.date || new Date().toISOString(),
+      },
+    ],
   };
 }
 

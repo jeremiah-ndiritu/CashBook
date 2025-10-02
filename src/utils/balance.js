@@ -42,7 +42,7 @@ export function getTransactionsStatistics(transactions) {
     } else if (t.type === "expense" && t.paymentStatus === "paid") {
       acc[method] -= t.amount;
     } else if (t.type === "expense" && t.paymentStatus === "partial") {
-      acc[method] += t.deposit || 0;
+      acc[method] -= t.deposit || 0;
     }
     // (Skipping partial expense deposits for now, since your schema doesn’t use them)
     return acc;
@@ -97,6 +97,14 @@ export function getDebtsStatistics(debts) {
     return acc;
   }, {});
 
+  let unclearedIncomingDebts = debts.filter(
+    (d) => d.type == "income" && d.amountOwed != 0
+  );
+  //unclearedIncomingDebts=unclearedIncomingDebts.map(d => (...d),)
+  let unclearedOutgoingDebts = debts.filter(
+    (d) => d.type == "expense" && d.status == "pending"
+  );
+
   return {
     clearedDebts,
     partialDebts,
@@ -104,5 +112,7 @@ export function getDebtsStatistics(debts) {
     expectedDebts,
     debtorBalances,
     totalDebt: clearedDebts + partialDebts + unpaidDebts,
+    unclearedIncomingDebts,
+    unclearedOutgoingDebts,
   };
 }

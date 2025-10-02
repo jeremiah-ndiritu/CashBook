@@ -69,7 +69,6 @@ export default function App() {
   const handleUpdateDebt = async (updatedDebt) => {
     try {
       let r = await updateDebtInDB(updatedDebt); // custom helper
-      console.log("r :>> ", r);
       if (r) {
         setDebts((prevDebts) =>
           prevDebts.map((d) =>
@@ -89,7 +88,7 @@ export default function App() {
       <UpdateButton />
       <h1>Cashbook 📒 ({todayKey})</h1>
       <InstallButton />
-      <BalanceSummary transactions={transactions} />
+      <BalanceSummary transactions={transactions} debts={debts} />
       <TransactionForm onAdd={handleAddTransaction} />
       {/* <TransactionList
         transactions={transactions.filter((t) => t.dayKey === todayKey)}

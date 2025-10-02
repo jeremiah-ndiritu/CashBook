@@ -3,11 +3,15 @@ import { useState } from "react";
 import Modal from "react-modal";
 import "../styles/BalanceSummary.css";
 import { getLocalDateKey } from "../utils/utils";
-import { getTransactionsStatistics } from "../utils/balance";
+import {
+  getDebtsStatistics,
+  getTransactionsStatistics,
+} from "../utils/balance";
+import DebtsSummary from "./DebtsSummary";
 
 Modal.setAppElement("#root");
 
-export default function BalanceSummary({ transactions }) {
+export default function BalanceSummary({ transactions, debts }) {
   const [isOpen, setIsOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
 
@@ -16,6 +20,7 @@ export default function BalanceSummary({ transactions }) {
   transactions = transactions.filter((t) => t.dayKey === todayKey);
 
   const ts = getTransactionsStatistics(transactions);
+  const ds = getDebtsStatistics(debts);
 
   const handleOpen = (type) => {
     setModalType(type);
@@ -28,7 +33,9 @@ export default function BalanceSummary({ transactions }) {
         return (
           <>
             <h2>💰 Total Income Today</h2>
-            <p>Here’s the breakdown of where the money flowed in:</p>
+            {ts.realBalance > 0 && (
+              <p>Here’s the breakdown of where the money flowed in:</p>
+            )}
             <ul>
               {Object.entries(ts.accountBalances).map(([method, balance]) =>
                 balance > 0 ? (
@@ -38,11 +45,18 @@ export default function BalanceSummary({ transactions }) {
                 ) : null
               )}
             </ul>
-            <p>
-              🔥 In total, you pulled in{" "}
-              <b>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</b>. Keep
-              working! 🚀 May God bless the work of your hands
-            </p>
+            {ts.realBalance > 0 ? (
+              <p>
+                🔥 In total, you pulled in{" "}
+                <b>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</b>.
+                Keep working! 🚀 May God bless the work of your hands
+              </p>
+            ) : (
+              <p>
+                Today you haven't gotten anything. Take heart and keep pressing
+                on
+              </p>
+            )}
           </>
         );
 
@@ -58,6 +72,9 @@ export default function BalanceSummary({ transactions }) {
               owe you this much).
             </p>
             <p>Make sure you pay the debts you owe to others. 🧾</p>
+            {}
+            {<DebtsSummary sDs={ds.unclearedIncomingDebts} type={"income"} />}
+            {<DebtsSummary sDs={ds.unclearedOutgoingDebts} type={"expense"} />}
           </>
         );
 

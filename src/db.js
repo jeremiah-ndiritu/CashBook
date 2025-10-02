@@ -49,6 +49,14 @@ export async function addTransaction(transaction) {
           ? transaction.amount - transaction.deposit
           : transaction.amount,
       date: transaction.date,
+      history: [
+        {
+          deposit: transaction?.deposit || 0,
+          method: transaction.paymentMethod,
+          balance: transaction?.amount - transaction?.deposit,
+          date: transaction?.date || new Date().toISOString(),
+        },
+      ],
     });
     await addDebt(debt);
     return debt || null;
@@ -64,13 +72,13 @@ export async function getTransaction(id) {
   if (!id) return null;
   const db = await initDB();
   const ts = await db.get(STORE_TRANSACTIONS, id);
-  return ts || null;
+  return normalizeTransaction(ts) || null;
 }
 export async function getDebt(id) {
   if (!id) return null;
   const db = await initDB();
   const debt = await db.get(STORE_DEBTS, id);
-  return debt || null;
+  return normalizeDebt(debt) || null;
 }
 // Debts
 export async function addDebt(debt) {
@@ -90,7 +98,6 @@ export async function updateDebtInDB(updatedDebt) {
 
   // Step 1: Look up by transactionId
   const existing = await index.get(updatedDebt?.transactionId);
-  console.log("existing :>> ", existing);
   if (!existing) {
     toast.warn("No debt found!");
     console.warn(
@@ -137,4 +144,59 @@ export async function getPage(
   const end = start + pageSize;
 
   return reversed.slice(start, end);
+}
+
+export async function join({
+  stores = ["debts", "transactions"],
+  column = "transactionId",
+} = {}) {
+  const db = await initDB();
+  const allData = {};
+
+  // Load all stores
+  for (const storeName of stores) {
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const items = await store.getAll();
+    allData[storeName] = items;
+  }
+
+  // Merge by the join column
+  const mergedMap = new Map();
+
+  for (const storeName of stores) {
+    for (const item of allData[storeName]) {
+      const key = item[column];
+      if (!key) continue;
+
+      if (!mergedMap.has(key)) mergedMap.set(key, {});
+      const existing = mergedMap.get(key);
+
+      // Merge properties, later stores overwrite same keys
+      Object.assign(existing, item);
+      mergedMap.set(key, existing);
+    }
+  }
+
+  return Array.from(mergedMap.values());
+}
+
+export async function getTsxsAndDebts() {
+  let db = await initDB();
+  const result = [];
+  const txs = await db.getAll(STORE_TRANSACTIONS);
+  const dts = await db.getAll(STORE_DEBTS);
+  if (!txs && !dts) return;
+
+  for (const t of txs) {
+    for (const d of dts) {
+      const td = {
+        transactionId: t.transactionId,
+        amountBilled: d.amountBilled,
+      };
+      result.push(td);
+    }
+  }
+
+  return result;
 }
