@@ -12,6 +12,7 @@ Modal.setAppElement("#root"); // accessibility
 export default function DebtsList({ debts, onUpdateDebt }) {
   const [selectedDebt, setSelectedDebt] = useState(null);
   const [newAmount, setNewAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [tsds, setTsDs] = useState([]);
   const ds = getDebtsStatistics(debts);
   ds;
@@ -51,6 +52,13 @@ export default function DebtsList({ debts, onUpdateDebt }) {
       return;
     }
 
+    if (!paymentMethod) {
+      toast.error(
+        "Please indicate the payment method used to make this transaction!"
+      );
+      return;
+    }
+
     let updated = {
       ...selectedDebt,
       amountOwed: selectedDebt.amountOwed - amount,
@@ -61,7 +69,7 @@ export default function DebtsList({ debts, onUpdateDebt }) {
     updated.history.push({
       deposit: amount,
       balance: selectedDebt.amountOwed - amount,
-      method: "",
+      method: paymentMethod,
       date: Date.now(),
     });
 
@@ -185,6 +193,19 @@ export default function DebtsList({ debts, onUpdateDebt }) {
                   value={newAmount}
                   onChange={(e) => setNewAmount(e.target.value)}
                 />
+                {/* Payment Method */}
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                >
+                  <option value="">-- Select Payment Method --</option>
+                  <option value="cash">Cash</option>
+                  <option value="MP-0745****15">M-Pesa 0745****15</option>
+                  <option value="PB-247247-Acc-0745****15">
+                    Paybill PB-247247 Acc 0745****15
+                  </option>
+                  <option value="other">Other</option>
+                </select>
                 <button onClick={handleUpdate}>Update</button>
               </div>
             )}
