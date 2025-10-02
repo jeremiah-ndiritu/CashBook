@@ -215,10 +215,11 @@ export default function DebtsList({ debts, onUpdateDebt }) {
                 <h3>History</h3>
                 {selectedDebt.history.map((h, index) => (
                   <p key={index}>
-                    {index + 1}. Paid {h.deposit} via {h.method} on{" "}
+                    {index + 1}. Paid Ksh <strong>{h.deposit}</strong> via{" "}
+                    {h.method} on{" "}
                     {new Date(h.date).toLocaleDateString() || "date"}{" "}
                     {new Date(h.date).toLocaleTimeString() || "date2"} — balance{" "}
-                    {h.balance}
+                    <strong>{h.balance}</strong>
                   </p>
                 ))}
               </div>

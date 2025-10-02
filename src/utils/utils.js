@@ -46,10 +46,10 @@ export function normalizeDebt(d) {
     clearedAt: d?.clearedAt || "Not cleared",
     history: [
       {
-        deposit: d?.deposit || 0,
-        method: "",
+        deposit: d?.amountBilled - d?.amountOwed || 0,
+        method: d?.method,
         balance: d?.amountOwed,
-        date: d?.date || new Date().toISOString(),
+        date: d?.date || Date.now(),
       },
     ],
   };
