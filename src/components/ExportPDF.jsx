@@ -16,6 +16,12 @@ export default function ExportPDF({ transactions, debts }) {
     if (reportType === "today") {
       return transactions.filter((t) => t.dayKey === todayKey);
     }
+    if (reportType === "yesterday") {
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+      const yesterdayKey = getLocalDateKey(yesterday);
+      return transactions.filter((t) => t.dayKey === yesterdayKey);
+    }
     if (reportType === "last7") {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(now.getDate() - 6);
@@ -35,6 +41,10 @@ export default function ExportPDF({ transactions, debts }) {
     return [];
   };
   const generatePDF = (mode = "full") => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = getLocalDateKey(yesterday);
+
     const filtered = filterTransactions();
     const doc = new jsPDF();
 
@@ -46,6 +56,8 @@ export default function ExportPDF({ transactions, debts }) {
 
     let reportTitle = "Cashbook Report";
     if (reportType === "today") reportTitle += " – Today";
+    if (reportType === "yesterday")
+      reportTitle += " - Yesterday " + yesterdayKey;
     if (reportType === "last7") reportTitle += " – Last 7 Days";
     if (reportType === "month") reportTitle += " – This Month";
     if (reportType === "all") reportTitle += " – All Records";
@@ -214,7 +226,7 @@ export default function ExportPDF({ transactions, debts }) {
     <div className="export-box">
       <h3>Select Report Type</h3>
       <div className="report-options">
-        {["today", "last7", "month", "all"].map((type) => (
+        {["today", "yesterday", "last7", "month", "all"].map((type) => (
           <label key={type}>
             <input
               type="radio"
@@ -223,6 +235,7 @@ export default function ExportPDF({ transactions, debts }) {
               onChange={(e) => setReportType(e.target.value)}
             />
             {type === "today" && "Today"}
+            {type === "yesterday" && "Yesterday"}
             {type === "last7" && "Last 7 Days"}
             {type === "month" && "This Month"}
             {type === "all" && "All Records"}
