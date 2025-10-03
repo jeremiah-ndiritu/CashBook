@@ -57,7 +57,8 @@ export default function ExportPDF({ transactions, debts }) {
     let reportTitle = "Cashbook Report";
     if (reportType === "today") reportTitle += " – Today";
     if (reportType === "yesterday")
-      reportTitle += " - Yesterday " + yesterdayKey;
+      reportTitle +=
+        " - Yesterday " + yesterdayKey.split("-").reverse().join("/");
     if (reportType === "last7") reportTitle += " – Last 7 Days";
     if (reportType === "month") reportTitle += " – This Month";
     if (reportType === "all") reportTitle += " – All Records";

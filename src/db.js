@@ -181,21 +181,46 @@ export async function join({
   return Array.from(mergedMap.values());
 }
 
+/**
+ * Get all transactions with their associated debts (flat merge)
+ * Returns an array of objects
+ */
 export async function getTsxsAndDebts() {
-  let db = await initDB();
-  const result = [];
+  const db = await initDB();
+
   const txs = await db.getAll(STORE_TRANSACTIONS);
   const dts = await db.getAll(STORE_DEBTS);
-  if (!txs && !dts) return;
+
+  if ((!txs || txs.length === 0) && (!dts || dts.length === 0)) return [];
+
+  // Build a quick lookup for debts by transactionId
+  const debtMap = new Map();
+  for (const d of dts) {
+    if (!d.transactionId) continue;
+    debtMap.set(d.transactionId, d);
+  }
+
+  const result = [];
 
   for (const t of txs) {
-    for (const d of dts) {
-      const td = {
-        transactionId: t.transactionId,
-        amountBilled: d.amountBilled,
-      };
-      result.push(td);
+    const td = {
+      ...t, // all transaction fields
+    };
+
+    // Merge matching debt if it exists
+    const matchingDebt = debtMap.get(t.transactionId);
+    if (matchingDebt) {
+      td.debtorName = matchingDebt.debtorName;
+      td.debtorNumber = matchingDebt.debtorNumber;
+      td.amountBilled = matchingDebt.amountBilled;
+      td.amountOwed = matchingDebt.amountOwed;
+      td.debtType = matchingDebt.type; // optional: avoid conflict with t.type
+      td.debtStatus = matchingDebt.status;
+      td.debtClearedAt = matchingDebt.clearedAt;
+      td.debtDate = matchingDebt.date; // original debt date
     }
+
+    result.push(td);
   }
 
   return result;
