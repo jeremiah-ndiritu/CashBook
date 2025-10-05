@@ -50,8 +50,8 @@ export default function BalanceSummary({ transactions, debts }) {
   );
   const ds = useMemo(() => getDebtsStatistics(todayDebts), [todayDebts]);
   const totals = getTotals(todayDebts, todayTransactions);
-  const expenseTotals = getExpenseTotals(debts, transactions);
-  const incomeTotals = getIncomeTotals(debts, transactions);
+  const expenseTotals = getExpenseTotals(todayDebts, todayTransactions);
+  const incomeTotals = getIncomeTotals(todayDebts, todayTransactions);
   console.log("totals :>> ", totals);
   console.log("incomeTotals :>> ", incomeTotals);
 
