@@ -114,3 +114,15 @@ export function getTotalPaidDeposits(debts) {
   }
   return total;
 }
+
+export function filterDebts(debts = [], transactions = []) {
+  let r = [];
+  for (const d of debts) {
+    for (const t of transactions) {
+      if (t.id == d.transactionId) {
+        r.push(d);
+      }
+    }
+  }
+  return r;
+}

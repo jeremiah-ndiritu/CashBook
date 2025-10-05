@@ -5,6 +5,8 @@ import autoTable from "jspdf-autotable";
 import "../styles/ExportPDF.css";
 
 import { getLocalDateKey, getLocalDateTimeKey } from "../utils/utils";
+import { getIncomeTotals } from "../utils/income";
+import { filterDebts } from "../utils/utils";
 export default function ExportPDF({ transactions, debts }) {
   const [reportType, setReportType] = useState("today");
 
@@ -45,7 +47,10 @@ export default function ExportPDF({ transactions, debts }) {
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayKey = getLocalDateKey(yesterday);
 
-    const filtered = filterTransactions();
+    const filteredTransactions = filterTransactions();
+    debts = filterDebts(debts, filteredTransactions);
+    let incomeTotals = getIncomeTotals(debts, filteredTransactions);
+    console.log("incomeTotals :>> ", incomeTotals);
     const doc = new jsPDF();
 
     // Header banner
@@ -70,7 +75,7 @@ export default function ExportPDF({ transactions, debts }) {
     });
     doc.setTextColor(0, 0, 0);
 
-    if (filtered.length === 0) {
+    if (filteredTransactions.length === 0) {
       doc.setFontSize(14);
       doc.text("No transactions found for this report.", 14, 50);
       doc.save(`cashbook-report-${getLocalDateTimeKey()}.pdf`);
@@ -80,7 +85,7 @@ export default function ExportPDF({ transactions, debts }) {
     // Totals
     let income = 0;
     let expense = 0;
-    filtered.forEach((t) => {
+    filteredTransactions.forEach((t) => {
       if (t.type === "income") income += t.amount;
       if (t.type === "expense") expense += t.amount;
     });
@@ -99,7 +104,7 @@ export default function ExportPDF({ transactions, debts }) {
 
     // Summary mode: only latest 5 transactions
     if (mode === "summary") {
-      const latest = filtered
+      const latest = filteredTransactions
         .slice(-5)
         .filter((t) => t) // filter out undefined
         .map((t) => [
@@ -123,7 +128,7 @@ export default function ExportPDF({ transactions, debts }) {
     }
 
     // Full transactions table
-    const rows = filtered
+    const rows = filteredTransactions
       .filter((t) => t) // skip undefined
       .map((t) => [
         getLocalDateKey(new Date(t.date)),
