@@ -126,3 +126,68 @@ export function filterDebts(debts = [], transactions = []) {
   }
   return r;
 }
+
+export function mapDay(day = 0) {
+  if (day == 0) return "Sunday";
+  if (day == 1) return "Monday";
+  if (day == 2) return "Tuesday";
+  if (day == 3) return "Wednesday";
+  if (day == 4) return "Thursday";
+  if (day == 5) return "Friday";
+  if (day == 6) return "Saturday";
+}
+export function makeReportTitle(mode = "full", type = "today") {
+  let prefix = mode == "full" ? "Cash Book Report" : "Cash Summary Report";
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = getLocalDateKey(yesterday);
+  switch (type) {
+    case "today":
+      return prefix + " – Today";
+    case "yesterday":
+      return (
+        prefix +
+        mapDay(yesterday.getDay()) +
+        yesterdayKey.split("-").reverse().join("/")
+      );
+    case "last7":
+      return prefix + " – Last 7 Days";
+    case "month":
+      return prefix + " – This Month";
+    case "all":
+      return prefix + " – All Records";
+    default:
+      return "Cash Book Report";
+  }
+}
+export const filterTransactions = (transactions, reportType = "today") => {
+  const now = new Date();
+  const todayKey = getLocalDateKey(now);
+
+  if (reportType === "today") {
+    return transactions.filter((t) => t.dayKey === todayKey);
+  }
+  if (reportType === "yesterday") {
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayKey = getLocalDateKey(yesterday);
+    return transactions.filter((t) => t.dayKey === yesterdayKey);
+  }
+  if (reportType === "last7") {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(now.getDate() - 6);
+    return transactions.filter((t) => new Date(t.date) >= sevenDaysAgo);
+  }
+  if (reportType === "month") {
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    return transactions.filter((t) => {
+      const d = new Date(t.date);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+  }
+  if (reportType === "all") {
+    return transactions;
+  }
+  return [];
+};

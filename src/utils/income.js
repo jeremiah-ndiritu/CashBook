@@ -15,6 +15,12 @@ export function getIncomeTotalsIn(
       }
     }
   }
+  transactions = transactions.filter(
+    (t) =>
+      t.type == "income" &&
+      t.paymentStatus == "paid" &&
+      t.paymentMethod.toLowerCase() == account.toLowerCase()
+  );
 
   // From transactions (paid or partial income)
   transactions
