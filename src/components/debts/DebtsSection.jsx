@@ -1,8 +1,8 @@
 // src/components/DebtsSection.jsx
 import { useState, useEffect } from "react";
 import DebtsList from "./DebtsList";
-import PaginationContainer from "./PaginationContainer";
-import { getPage, getStoreCount } from "../db"; // your IndexedDB helpers
+import PaginationContainer from "../PaginationContainer";
+import { getPage, getStoreCount } from "../../db"; // your IndexedDB helpers
 
 export default function DebtsSection({ onUpdateDebt, refresh }) {
   const [debts, setDebts] = useState([]);

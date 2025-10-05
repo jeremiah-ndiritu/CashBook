@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../styles/TransactionForm.css";
+import "./TransactionForm.css";
 
 const starn = (str = "") => {
   switch (str) {
@@ -63,7 +63,7 @@ export default function TransactionForm({ onAdd }) {
       paymentMethod,
       type,
       paymentStatus: starn(credit), // paid | partial | unpaid
-      deposit: parseFloat(deposit),
+      deposit: parseFloat(deposit) || 0,
       debtorName: debtorName.trim() || null,
       debtorNumber: debtorNumber.trim() || null,
       date: new Date().toISOString(),

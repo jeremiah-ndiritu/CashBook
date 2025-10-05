@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import PaginationContainer from "./PaginationContainer";
+import PaginationContainer from "../PaginationContainer";
 import TransactionList from "./TransactionList";
-import { getPage, getStoreCount } from "../db";
+import { getPage, getStoreCount } from "../../db";
 
 export default function TransactionListSection({ refresh }) {
   const PAGE_SIZE = 5;

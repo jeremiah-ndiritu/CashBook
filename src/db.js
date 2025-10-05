@@ -1,7 +1,6 @@
 // src/db.js
 import { openDB } from "idb";
 import { normalizeDebt, normalizeTransaction } from "./utils/utils";
-import { toast } from "react-toastify";
 
 const DB_NAME = "cashbook-db";
 const STORE_TRANSACTIONS = "transactions";
@@ -43,6 +42,7 @@ export async function addTransaction(transaction) {
       debtorName: transaction.debtorName || null,
       debtorNumber: transaction.debtorNumber || null,
       type: transaction.type,
+      paymentMethod: transaction?.paymentMethod,
       amountBilled: transaction.amount,
       amountOwed:
         transaction.paymentStatus == "partial"
@@ -68,18 +68,49 @@ export async function getTransactions() {
   return (await db.getAll(STORE_TRANSACTIONS)).map(normalizeTransaction);
 }
 
-export async function getTransaction(id) {
-  if (!id) return null;
+export async function getTransaction(transactionId) {
+  if (!transactionId) {
+    console.warn("getTransaction() called without transactionId");
+    return null;
+  }
+
   const db = await initDB();
-  const ts = await db.get(STORE_TRANSACTIONS, id);
-  return normalizeTransaction(ts) || null;
+  const tx = db.transaction(STORE_TRANSACTIONS, "readonly");
+  const store = tx.objectStore(STORE_TRANSACTIONS);
+
+  let txn = null;
+  try {
+    // ✅ since id is the keyPath
+    txn = await store.get(Number(transactionId));
+    if (!txn) txn = await store.get(String(transactionId));
+  } catch (err) {
+    console.error("getTransaction(): failed to fetch by id", err);
+  }
+  return txn ? normalizeTransaction(txn) : null;
 }
-export async function getDebt(id) {
-  if (!id) return null;
+
+export async function getDebt(transactionId) {
+  if (!transactionId) {
+    console.warn("getDebt() called without transactionId");
+    return null;
+  }
+
   const db = await initDB();
-  const debt = await db.get(STORE_DEBTS, id);
-  return normalizeDebt(debt) || null;
+  const tx = db.transaction(STORE_DEBTS, "readonly");
+  const store = tx.objectStore(STORE_DEBTS);
+
+  // ✅ Use index if available
+  let debt = null;
+  try {
+    const index = store.index("transactionId");
+    debt = await index.get(Number(transactionId));
+    if (!debt) debt = await index.get(String(transactionId));
+  } catch (err) {
+    console.error("getDebt(): Failed to use index 'transactionId'", err);
+  }
+  return debt ? normalizeDebt(debt) : null;
 }
+
 // Debts
 export async function addDebt(debt) {
   const db = await initDB();
@@ -90,32 +121,64 @@ export async function getDebts() {
   const db = await initDB();
   return (await db.getAll(STORE_DEBTS)).map(normalizeDebt);
 }
-export async function updateDebtInDB(updatedDebt) {
-  const db = await openDB(DB_NAME, 2);
-  const tx = db.transaction(STORE_DEBTS, "readwrite");
-  const store = tx.objectStore(STORE_DEBTS);
-  const index = store.index("transactionId");
 
-  // Step 1: Look up by transactionId
-  const existing = await index.get(updatedDebt?.transactionId);
-  if (!existing) {
-    toast.warn("No debt found!");
-    console.warn(
-      "No debt found with transactionId:",
-      updatedDebt.transactionId
-    );
-    return null; // fail gracefully
+export async function updateDebtInDB(updatedDebt) {
+  if (!updatedDebt?.transactionId) {
+    console.warn("updateDebtInDB() called without transactionId");
+    return null;
   }
 
-  // Step 2: Carry forward the id
-  updatedDebt.id = existing.id;
+  const db = await openDB(DB_NAME, DB_VERSION);
+  const tx = db.transaction([STORE_DEBTS, STORE_TRANSACTIONS], "readwrite");
+  const debtStore = tx.objectStore(STORE_DEBTS);
+  const txStore = tx.objectStore(STORE_TRANSACTIONS);
 
-  // Step 3: Save back
-  await store.put(updatedDebt);
+  // ✅ Fetch existing debt via index
+  const debtIndex = debtStore.index("transactionId");
+  const existingDebt = await debtIndex.get(updatedDebt.transactionId);
+  if (!existingDebt) {
+    console.warn(
+      "No existing debt found for transactionId:",
+      updatedDebt.transactionId
+    );
+    await tx.done;
+    return null;
+  }
+
+  // ✅ Fetch associated transaction
+  const transaction =
+    (await txStore.get(Number(updatedDebt.transactionId))) ||
+    (await txStore.get(updatedDebt.transactionId));
+  if (!transaction) {
+    console.warn("No transaction found for ID:", updatedDebt.transactionId);
+    await tx.done;
+    return null;
+  }
+
+  // ✅ Update the deposit properly
+  let totalDeposit = (updatedDebt?.history || []).reduce(
+    (acc, h) => acc + Number(h?.deposit || 0),
+    0
+  );
+
+  const updatedTransaction = { ...transaction, deposit: totalDeposit };
+
+  // ✅ Keep same IDs for consistency
+  updatedDebt.id = existingDebt.id;
+
+  // ✅ Save both back
+  await debtStore.put(updatedDebt);
+  await txStore.put(updatedTransaction);
 
   await tx.done;
-  return normalizeDebt(updatedDebt); // nice to return the fresh object
+
+  console.log("✅ Updated debt:", updatedDebt);
+  console.log("former transaction :>> ", transaction);
+  console.log("✅ Updated transaction:", updatedTransaction);
+
+  return normalizeDebt(updatedDebt);
 }
+
 export async function getStoreCount(storeName) {
   const db = await initDB();
   const tx = db.transaction(storeName, "readonly");
@@ -145,7 +208,6 @@ export async function getPage(
 
   return reversed.slice(start, end);
 }
-
 export async function join({
   stores = ["debts", "transactions"],
   column = "transactionId",

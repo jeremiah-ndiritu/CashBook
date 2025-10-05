@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTransaction } from "../db";
+import { getTransaction } from "../../db";
 
 export default function Debts({ sDs, type }) {
   const [txMap, setTxMap] = useState({});
@@ -10,7 +10,9 @@ export default function Debts({ sDs, type }) {
       const map = {};
       for (const d of sDs) {
         const t = await getTransaction(d.transactionId);
-        map[d.transactionId] = t.description;
+        if (t) {
+          map[d.transactionId] = t.description;
+        }
       }
       setTxMap(map);
     }

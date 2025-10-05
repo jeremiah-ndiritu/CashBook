@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { toast } from "react-toastify";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import "../styles/DebtsList.css";
-import { timeAgo } from "../utils/utils";
-import { getDebtsStatistics } from "../utils/balance";
-import { join } from "../db";
+import "./DebtsList.css";
+import { timeAgo } from "../../utils/utils";
+import { getDebtsStatistics } from "../../utils/balance";
+import { join } from "../../db";
 Modal.setAppElement("#root"); // accessibility
 
 export default function DebtsList({ debts, onUpdateDebt }) {
@@ -90,7 +90,7 @@ export default function DebtsList({ debts, onUpdateDebt }) {
           <tr>
             <th>Debtor</th>
             <th>Phone</th>
-            <th>Transaction ID</th>
+            <th>Type</th>
             <th>Amount Owed (Ksh)</th>
             <th>Date</th>
           </tr>
@@ -101,7 +101,7 @@ export default function DebtsList({ debts, onUpdateDebt }) {
 
             const debtorName = d?.debtorName || "-";
             const debtorNumber = d?.debtorNumber || "-";
-            const transactionId = d?.transactionId || "-";
+            const debtType = d?.type || "-";
             const amountOwed = d?.amountOwed
               ? d?.amountOwed.toFixed(2)
               : "0.00";
@@ -137,7 +137,7 @@ export default function DebtsList({ debts, onUpdateDebt }) {
                     "-"
                   )}
                 </td>
-                <td>{transactionId}</td>
+                <td>{debtType}</td>
                 <td>{amountOwed}</td>
                 <td style={{ display: "flex", flexDirection: "column" }}>
                   <span>{date}</span>

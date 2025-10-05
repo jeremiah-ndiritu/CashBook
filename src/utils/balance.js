@@ -1,3 +1,5 @@
+import { getBalanceByMethodFromDebts, getTotalPaidDeposits } from "./utils";
+
 export function getTransactionsStatistics(transactions) {
   const paidIncome = transactions
     .filter((t) => t.type === "income" && t.paymentStatus === "paid")
@@ -32,7 +34,7 @@ export function getTransactionsStatistics(transactions) {
 
   // Per-account tracking
   const accountBalances = transactions.reduce((acc, t) => {
-    const method = t.paymentMethod || "Unknown";
+    const method = t.paymentMethod || "other";
     if (!acc[method]) acc[method] = 0;
 
     if (t.type === "income" && t.paymentStatus === "paid") {
@@ -44,7 +46,6 @@ export function getTransactionsStatistics(transactions) {
     } else if (t.type === "expense" && t.paymentStatus === "partial") {
       acc[method] -= t.deposit || 0;
     }
-    // (Skipping partial expense deposits for now, since your schema doesn’t use them)
     return acc;
   }, {});
 
@@ -61,7 +62,7 @@ export function getTransactionsStatistics(transactions) {
   };
 }
 
-export function getDebtsStatistics(debts) {
+export function getDebtsStatistics(debts = []) {
   // Fully cleared debts
   const clearedDebts = debts
     .filter((d) => d.amountOwed === 0)
@@ -78,6 +79,8 @@ export function getDebtsStatistics(debts) {
       0
     );
 
+  const balanceByMethod = getBalanceByMethodFromDebts(debts);
+
   // Outstanding debts (still owed)
   const unpaidDebts = debts
     .filter((d) => d.amountOwed > 0)
@@ -89,7 +92,7 @@ export function getDebtsStatistics(debts) {
     0
   );
 
-  // Optional: per-debtor breakdown
+  // Per-debtor breakdown
   const debtorBalances = debts.reduce((acc, d) => {
     const name = d.debtorName || "Unknown";
     if (!acc[name]) acc[name] = 0;
@@ -97,12 +100,22 @@ export function getDebtsStatistics(debts) {
     return acc;
   }, {});
 
-  let unclearedIncomingDebts = debts.filter(
-    (d) => d.type == "income" && d.amountOwed != 0
+  // Incoming vs outgoing debts
+  const totalIncomingDebts = debts
+    .filter((d) => d.type === "income")
+    .reduce((acc, d) => acc + (d.amountOwed || 0), 0);
+
+  const totalOutgoingDebts = debts
+    .filter((d) => d.type === "expense")
+    .reduce((acc, d) => acc + (d.amountOwed || 0), 0);
+
+  // Uncleared (pending) lists
+  const unclearedIncomingDebts = debts.filter(
+    (d) => d.type === "income" && d.amountOwed !== 0
   );
-  //unclearedIncomingDebts=unclearedIncomingDebts.map(d => (...d),)
-  let unclearedOutgoingDebts = debts.filter(
-    (d) => d.type == "expense" && d.status == "pending"
+
+  const unclearedOutgoingDebts = debts.filter(
+    (d) => d.type === "expense" && d.status === "pending"
   );
 
   return {
@@ -110,8 +123,12 @@ export function getDebtsStatistics(debts) {
     partialDebts,
     unpaidDebts,
     expectedDebts,
+    balanceByMethod,
     debtorBalances,
+    totalPaidDeposits: getTotalPaidDeposits(debts),
     totalDebt: clearedDebts + partialDebts + unpaidDebts,
+    totalIncomingDebts,
+    totalOutgoingDebts,
     unclearedIncomingDebts,
     unclearedOutgoingDebts,
   };

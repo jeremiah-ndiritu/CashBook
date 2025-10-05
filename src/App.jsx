@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import TransactionForm from "./components/TransactionForm";
-import TransactionList from "./components/TransactionList";
-import BalanceSummary from "./components/BalanceSummary";
+import TransactionForm from "./components/transactions/TransactionForm";
+import BalanceSummary from "./components/BalanceSummary/BalanceSummary";
 import ExportPDF from "./components/ExportPDF";
 import {
   addTransaction,
@@ -13,12 +12,11 @@ import {
   getDebts,
 } from "./db";
 import InstallButton from "./components/InstallButton";
-import DebtsList from "./components/DebtsList";
 
 import "./App.css"; // import our custom css
 import UpdateButton from "./components/UpdateButton";
-import TransactionListSection from "./components/TransactionListSection";
-import DebtsSection from "./components/DebtsSection";
+import TransactionListSection from "./components/transactions/TransactionListSection";
+import DebtsSection from "./components/debts/DebtsSection";
 // Get today's date key (YYYY-MM-DD)
 function getTodayKey() {
   const now = new Date();
@@ -80,7 +78,7 @@ export default function App() {
       }
     } catch (err) {
       toast.error("Failed to update debt!");
-      console.log("err updating debt :>> ", err);
+      console.log("failed to update debt", err);
     }
   };
   return (
@@ -90,13 +88,9 @@ export default function App() {
       <InstallButton />
       <BalanceSummary transactions={transactions} debts={debts} />
       <TransactionForm onAdd={handleAddTransaction} />
-      {/* <TransactionList
-        transactions={transactions.filter((t) => t.dayKey === todayKey)}
-      /> */}
+
       <TransactionListSection refresh={refreshTsxs} />
       <DebtsSection onUpdateDebt={handleUpdateDebt} refresh={refreshDebts} />
-
-      {/* <DebtsList debts={debts} onUpdateDebt={handleUpdateDebt} /> */}
 
       <ExportPDF transactions={transactions} debts={debts} />
       <ToastContainer

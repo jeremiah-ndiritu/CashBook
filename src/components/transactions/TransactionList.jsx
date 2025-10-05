@@ -1,6 +1,6 @@
 // src/components/TransactionList.jsx
 import TransactionItem from "./TransactionItem";
-import "../styles/TransactionList.css";
+import "./TransactionList.css";
 
 export default function TransactionList({ transactions }) {
   if (!transactions || transactions.length === 0) {

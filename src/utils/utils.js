@@ -30,6 +30,18 @@ export function normalizeTransaction(t) {
     debtorName: t?.debtorName || null,
     debtorNumber: t?.debtorNumber || null,
     date: t?.date || new Date().toISOString(),
+    debt: {
+      transactionId: t?.transactionId,
+      debtorName: t?.debtorName,
+      debtorNumber: t?.debtorNumber,
+      amountBilled: t?.amount,
+      amountOwed: t?.amount - t?.deposit,
+      status: t?.paymentStatus,
+      type: t?.type,
+      clearedAt: "",
+      date: t?.date,
+      history: t.debt ? [...t.debt.history] : [],
+    },
   };
 }
 
@@ -44,17 +56,18 @@ export function normalizeDebt(d) {
     date: d.date || new Date().toISOString(),
     status: d?.amountOwed == 0 ? "cleared" : "pending",
     clearedAt: d?.clearedAt || "Not cleared",
-    history: [
-      {
-        deposit: d?.amountBilled - d?.amountOwed || 0,
-        method: d?.method,
-        balance: d?.amountOwed,
-        date: d?.date || Date.now(),
-      },
-    ],
+    history: d?.history ? [...d.history] : [],
   };
 }
 
+export function normalizeDebtHistoryEntry(dh) {
+  return {
+    deposit: dh?.deposit || 0,
+    method: String(dh?.method) || "give",
+    balance: dh?.balance,
+    date: dh?.date || Date.now(),
+  };
+}
 export function timeAgo(dateString) {
   const date = new Date(dateString);
   const now = new Date();
@@ -69,4 +82,35 @@ export function timeAgo(dateString) {
   if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   if (minutes > 0) return `${minutes} min ago`;
   return "just now";
+}
+
+export const isFullyPaid = (transaction = {}) => {
+  // Defensive coding: handle undefined/null gracefully
+  const status = transaction.paymentStatus?.toLowerCase?.();
+  return status === "paid" || status === "cleared";
+};
+
+export function getBalanceByMethodFromDebts(debts) {
+  const balances = {};
+
+  debts.forEach((debt) => {
+    debt.history?.forEach((entry) => {
+      const method = entry.method?.toLowerCase() || "other";
+      const deposit = Number(entry.deposit) || 0;
+      balances[method] = (balances[method] || 0) + deposit;
+    });
+  });
+
+  return balances;
+}
+export function getTotalPaidDeposits(debts) {
+  debts = debts.filter((d) => d);
+  let total = 0;
+
+  for (const d of debts) {
+    for (const h of d.history) {
+      total += h.deposit;
+    }
+  }
+  return total;
 }
