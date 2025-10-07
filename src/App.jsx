@@ -32,7 +32,7 @@ export default function App() {
   const [todayKey, setTodayKey] = useState(getTodayKey());
   const [refreshTsxs, setRefreshTsxs] = useState(false);
   const [refreshDebts, setRefreshDebts] = useState(false);
-
+  let backendURL = import.meta.env.VITE_CASHBOOK_API_URL;
   // Reload todayKey every minute so if date changes, it updates
   useEffect(() => {
     const interval = setInterval(() => {
@@ -53,6 +53,21 @@ export default function App() {
     fetchData();
   }, [todayKey]);
 
+  useEffect(() => {
+    let addTx = async () => {
+      let res = fetch(`${backendURL}/api/transactions`, {
+        method: "POST",
+        body: JSON.stringify({ transactions: transactions, debts: debts }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.ok) {
+        alert("Res is ok");
+      }
+    };
+    addTx();
+  }, [backendURL, debts, transactions]);
   const handleAddTransaction = async (transaction) => {
     const newTx = { ...transaction, dayKey: todayKey };
     let debt = await addTransaction(newTx);

@@ -3,10 +3,10 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// PWA service worker registration
-import { registerSW } from "virtual:pwa-register";
+import { initSW, enableSWRecovery } from "./utils/sw.js";
 
-registerSW({ immediate: true });
+initSW();
+enableSWRecovery();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
