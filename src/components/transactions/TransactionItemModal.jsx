@@ -41,7 +41,6 @@ export default function TransactionItemModal({
     if (!history?.length) return deposit ?? 0;
     return history?.reduce((sum, h) => sum + (h?.deposit ?? 0), 0);
   }, [history, deposit]);
-  if (!totalPaid || totalPaid == 0) totalPaid = amount;
 
   const latestDeposit = latestHistory?.deposit ?? deposit ?? 0;
   const latestMethod = latestHistory?.method ?? paymentMethod ?? "N/A";
