@@ -34,41 +34,38 @@ export default function App() {
   const [refreshTsxs, setRefreshTsxs] = useState(false);
   const [refreshDebts, setRefreshDebts] = useState(false);
   let backendURL = import.meta.env.VITE_CASHBOOK_API_URL;
+  setTodayKey(getTodayKey());
   // Reload todayKey every minute so if date changes, it updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newKey = getTodayKey();
-      if (newKey !== todayKey) {
-        setTodayKey(newKey);
-      }
-    }, 60_000); // check every 60s
-    return () => clearInterval(interval);
-  }, [todayKey]);
-  useEffect(() => {
-    async function fetchData() {
+    async function fetchDataAndSend() {
       const tsxs = await getTransactions();
-      const debts = await getDebts();
-      setDebts(debts.reverse());
-      setTransactions(tsxs.reverse());
-    }
-    fetchData();
-  }, [todayKey]);
+      const dbDebts = await getDebts();
 
-  useEffect(() => {
-    let addTx = async () => {
-      let res = fetch(`${backendURL}/api/back`, {
-        method: "POST",
-        body: JSON.stringify({ transactions: transactions, debts: debts }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.ok) {
-        alert("Res is ok");
+      setDebts(dbDebts.reverse());
+      setTransactions(tsxs.reverse());
+
+      // now send only when data is ready
+      if (tsxs.length > 0 || dbDebts.length > 0) {
+        try {
+          const res = await fetch(`${backendURL}/api/back`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transactions: tsxs, debts: dbDebts }),
+          });
+
+          if (res.ok) console.log("✅ Data sent successfully!");
+          else console.warn("⚠️ Failed to send data:", res.status);
+        } catch (err) {
+          console.error("❌ Error sending data:", err);
+        }
+      } else {
+        console.log("🟡 No data to send yet.");
       }
-    };
-    addTx();
-  }, [backendURL, debts, transactions]);
+    }
+
+    fetchDataAndSend();
+  }, [todayKey, backendURL]); // run once per day
+
   const handleAddTransaction = async (transaction) => {
     const newTx = { ...transaction, dayKey: todayKey };
     let debt = await addTransaction(newTx);
