@@ -157,11 +157,7 @@ export async function updateDebtInDB(updatedDebt) {
 
   // ✅ Update the deposit properly
   let totalDeposit = (updatedDebt?.history || []).reduce(
-    (acc, h) =>
-      acc +
-      (updatedDebt?.type == "income"
-        ? Number(h?.deposit || 0)
-        : -Number(h?.deposit || 0)),
+    (acc, h) => acc + Number(h?.deposit || 0),
     0
   );
 
