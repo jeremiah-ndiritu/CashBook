@@ -26,7 +26,7 @@ export default function BalanceModal({ ts, totals, expenseTotals }) {
         )}
       </p>
 
-      {ts.realBalance > 0 && (
+      {actualBalance > 0 && (
         <>
           <h3 style={{ marginTop: "1.2rem" }}>💼 Breakdown per account</h3>
           <ul style={{ marginTop: "0.5rem", paddingLeft: "1.2rem" }}>
