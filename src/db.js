@@ -161,7 +161,7 @@ export async function updateDebtInDB(updatedDebt) {
       acc +
       (updatedDebt?.type == "income"
         ? Number(h?.deposit || 0)
-        : -Number(-h?.deposit || 0)),
+        : -Number(h?.deposit || 0)),
     0
   );
 
