@@ -53,7 +53,10 @@ export default function BalanceSummary({ transactions, debts }) {
   const expenseTotals = getExpenseTotals(todayDebts, todayTransactions);
   const incomeTotals = getIncomeTotals(todayDebts, todayTransactions);
 
-  let totalIncome = Object.values(totals).reduce((acc, arr) => acc + arr, 0);
+  let totalIncome = Object.values(incomeTotals).reduce(
+    (acc, arr) => acc + arr,
+    0
+  );
   let totalExpense = Object.values(expenseTotals).reduce(
     (acc, v) => acc + v,
     0
@@ -77,7 +80,7 @@ export default function BalanceSummary({ transactions, debts }) {
       case "income":
         return (
           <IncomeModal
-            totals={totals}
+            totalIncome={totalIncome}
             incomeTotals={incomeTotals}
             ts={ts}
             ds={ds}

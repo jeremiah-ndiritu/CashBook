@@ -1,6 +1,9 @@
 // src/components/BalanceSummary/IncomeModal.jsx
-export default function IncomeModal({ totals, incomeTotals, methodIcons }) {
-  const totalIncome = Object.values(totals).reduce((acc, arr) => acc + arr, 0);
+export default function IncomeModal({
+  incomeTotals,
+  methodIcons,
+  totalIncome,
+}) {
   return (
     <>
       <h2>💰 Total Income Today</h2>
