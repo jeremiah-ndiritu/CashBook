@@ -56,7 +56,11 @@ export default function BalanceSummary({ transactions, debts }) {
   console.log("incomeTotals :>> ", incomeTotals);
 
   let totalIncome = Object.values(totals).reduce((acc, arr) => acc + arr, 0);
-  let actualBalance = totalIncome - ts.paidExpense;
+  let totalExpense = Object.values(expenseTotals).reduce(
+    (acc, v) => acc + v,
+    0
+  );
+  let actualBalance = totalIncome - totalExpense;
   // 🔘 Modal logic remains same
   const handleOpen = (type) => {
     setModalType(type);
