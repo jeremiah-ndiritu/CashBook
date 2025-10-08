@@ -100,7 +100,7 @@ export default function BalanceSummary({ transactions, debts }) {
       <div className="balance-summary-grid">
         <div className="balance-card" onClick={() => handleOpen("income")}>
           <h4>Total Income Today</h4>
-          <p>Ksh {(ts.paidIncome + ts.incomeDeposits).toFixed(2)}</p>
+          <p>Ksh {totalIncome.toFixed(2)}</p>
         </div>
 
         <div className="balance-card" onClick={() => handleOpen("debts")}>
