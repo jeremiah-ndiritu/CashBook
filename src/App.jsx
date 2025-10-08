@@ -25,6 +25,7 @@ function getTodayKey() {
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+// ithink its okay now
 
 export default function App() {
   const [transactions, setTransactions] = useState([]);
