@@ -6,13 +6,13 @@ export default function BalanceModal({ ts, totals, expenseTotals }) {
     <>
       <h2>📊 Current Balance</h2>
       <p>
-        {ts.realBalance == 0 && (
+        {actualBalance == 0 && (
           <>
             😎 No problem. You have no Ksh 0.00 left. Keep pushing. Never lose
             hope!
           </>
         )}
-        {ts.realBalance > 0 ? (
+        {actualBalance > 0 ? (
           <>
             ✅ You’re up with <b>Ksh {actualBalance.toFixed(2)}</b> left. Chill
             and shine ✨
