@@ -1,7 +1,5 @@
 // src/components/BalanceSummary/BalanceModal.jsx
-export default function BalanceModal({ ts, totals, expenseTotals }) {
-  let totalIncome = Object.values(totals).reduce((acc, arr) => acc + arr, 0);
-  let actualBalance = totalIncome - ts.paidExpense;
+export default function BalanceModal({ totals, expenseTotals, actualBalance }) {
   return (
     <>
       <h2>📊 Current Balance</h2>
