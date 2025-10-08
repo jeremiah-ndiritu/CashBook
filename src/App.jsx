@@ -56,7 +56,7 @@ export default function App() {
 
   useEffect(() => {
     let addTx = async () => {
-      let res = fetch(`${backendURL}/api/transactions`, {
+      let res = fetch(`${backendURL}/api/back`, {
         method: "POST",
         body: JSON.stringify({ transactions: transactions, debts: debts }),
         headers: {
