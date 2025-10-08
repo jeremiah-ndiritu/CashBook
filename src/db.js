@@ -157,7 +157,11 @@ export async function updateDebtInDB(updatedDebt) {
 
   // ✅ Update the deposit properly
   let totalDeposit = (updatedDebt?.history || []).reduce(
-    (acc, h) => acc + Number(h?.deposit || 0),
+    (acc, h) =>
+      acc +
+      (updatedDebt?.type == "income"
+        ? Number(h?.deposit || 0)
+        : -Number(-h?.deposit || 0)),
     0
   );
 
@@ -171,10 +175,6 @@ export async function updateDebtInDB(updatedDebt) {
   await txStore.put(updatedTransaction);
 
   await tx.done;
-
-  console.log("✅ Updated debt:", updatedDebt);
-  console.log("former transaction :>> ", transaction);
-  console.log("✅ Updated transaction:", updatedTransaction);
 
   return normalizeDebt(updatedDebt);
 }
