@@ -2,11 +2,12 @@
 import { openDB } from "idb";
 import { normalizeDebt, normalizeTransaction } from "./utils/utils";
 
-const DB_NAME = "cashbook-db";
-const STORE_TRANSACTIONS = "transactions";
-const STORE_DEBTS = "debts";
+export const DB_NAME = "cashbook-db";
+export const STORE_TRANSACTIONS = "transactions";
+export const STORE_DEBTS = "debts";
+export const STORE_CYLINDERS = "cylinders";
 
-const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export async function initDB() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -25,6 +26,18 @@ export async function initDB() {
         debtStore.createIndex("transactionId", "transactionId", {
           unique: false,
         });
+      }
+
+      // ✅ Cylinders Store
+      if (!db.objectStoreNames.contains(STORE_CYLINDERS)) {
+        const cylinderStore = db.createObjectStore(STORE_CYLINDERS, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+
+        // Optional indexes for efficient lookups
+        cylinderStore.createIndex("name", "name", { unique: false });
+        cylinderStore.createIndex("capacity", "capacity", { unique: false });
       }
     },
   });

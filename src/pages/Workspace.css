@@ -1,0 +1,29 @@
+/* Card look for all components */
+.balance-summary,
+.transaction-form,
+.transaction-list,
+.export-pdf-btn {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* PDF export button */
+.export-pdf-btn {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  transition: background 0.2s;
+}
+
+.export-pdf-btn:hover {
+  background: #219150;
+}
