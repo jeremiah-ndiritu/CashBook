@@ -24,6 +24,7 @@ export default function AddCylinder({ setCylinders }) {
     if (setCylinders) {
       setCylinders((prev) => [addedCylinder, ...prev]);
     }
+    toast.success("Gas cylinder added successfully!");
     setNewCylinder({
       name: "",
       capacity: "",
