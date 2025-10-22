@@ -6,14 +6,9 @@ export function normalizeGasCylinder(c) {
     name: String(c?.name) || "N/A",
     capacity: String(c?.capacity) || "6",
     capacityUnit: c?.capacityUnit || "kg",
-    cylinderBuyingPrice: parseFloat(c?.cylinderBuyingPrice),
-    gasBuyingPrice: parseFloat(c?.gasBuyingPrice),
-    buyingPrice:
-      parseFloat(c?.gasBuyingPrice || 0) +
-      parseFloat(c?.cylinderBuyingPrice || 0),
-    sellingPrice: parseFloat(c?.sellingPrice) || 3000.0,
-    refillPrice: parseFloat(c?.refillPrice) || 1050.0,
     quantity: parseInt(c?.quantity) || 1,
+    empty: parseInt(c?.empty) || 0,
+    full: parseInt(c?.full) || 1,
   };
 }
 
@@ -35,13 +30,21 @@ export async function getCylinders() {
   await tx.done;
   return all.map(normalizeGasCylinder).reverse();
 }
-
-export async function updateCylinderQuantity(name, delta) {
+export async function getCylinderById(id) {
+  const db = await initDB();
+  const tx = db.transaction(STORE_CYLINDERS, "readonly");
+  const store = tx.objectStore(STORE_CYLINDERS);
+  const c = await store.get(Number(id));
+  await tx.done;
+  return normalizeGasCylinder(c);
+}
+export async function updateCylinderQuantity(id, delta) {
+  delta = parseInt(delta);
   const db = await initDB();
   const tx = db.transaction(STORE_CYLINDERS, "readwrite");
   const store = tx.objectStore(STORE_CYLINDERS);
   const all = await store.getAll();
-  const cylinder = all.find((c) => c.name === name);
+  const cylinder = all.find((c) => c.id === id);
   if (!cylinder) throw new Error("Cylinder not found");
   cylinder.quantity = Math.max(0, cylinder.quantity + delta);
   await store.put(cylinder);
@@ -49,13 +52,46 @@ export async function updateCylinderQuantity(name, delta) {
   return normalizeGasCylinder(cylinder);
 }
 
-export async function deleteCylinder(name) {
+export async function deleteCylinder(id) {
   const db = await initDB();
   const tx = db.transaction(STORE_CYLINDERS, "readwrite");
   const store = tx.objectStore(STORE_CYLINDERS);
   const all = await store.getAll();
-  const target = all.find((c) => c.name === name);
+  const target = all.find((c) => c.id === id);
   if (target) await store.delete(target.id);
   await tx.done;
   return true;
+}
+export async function refillGas(id, quantity) {
+  id = Number(id);
+  quantity = Number(quantity);
+
+  const c = await getCylinderById(id);
+  if (!c) throw new Error(`Cylinder with ID ${id} not found`);
+
+  const db = await initDB();
+  const tx = db.transaction(STORE_CYLINDERS, "readwrite");
+  const store = tx.objectStore(STORE_CYLINDERS);
+
+  // prevent negative counts just in case
+  const updatedCylinder = {
+    ...c,
+    full: Math.max(0, (c.full || 0) - quantity),
+    empty: (c.empty || 0) + quantity,
+  };
+
+  await store.put(updatedCylinder);
+  await tx.done;
+  console.log("updatedCylinder :>> ", updatedCylinder);
+  return updatedCylinder;
+}
+
+export async function getGasTypes() {
+  const cylinders = await getCylinders();
+
+  return cylinders.map((c) => ({
+    id: c?.id ?? null,
+    name: c?.name ?? "Unknown",
+    capacity: c?.capacity + c?.capacityUnit,
+  }));
 }

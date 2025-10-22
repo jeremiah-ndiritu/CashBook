@@ -1,47 +1,87 @@
-/* Keep CylinderItem styling */
 .cylinder-item {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1rem 1.2rem;
-  background: #f7f9fc;
-  border-left: 5px solid #0077ff;
+  background: #0d1b2a;
+  border: 1px solid #007bff; /* Blue border by default */
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, background 0.2s;
+  padding: 0.8rem 1rem;
+  margin: 0.6rem 0;
+  width: 100%;
+  color: #e0e8ff;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  box-sizing: border-box;
+  overflow-x: hidden; /* prevent sideways scroll */
 }
 
 .cylinder-item:hover {
+  box-shadow: inset 2px 2px 25px #fff;
+  background: rgb(9, 9, 95); /* slightly darker background on hover */
   transform: translateY(-2px);
-  background: #eef5ff;
 }
 
-.cylinder-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.4rem;
-  font-size: 1rem;
-}
-
+/* Cylinder name */
 .cylinder-name {
   font-weight: 600;
-  color: #004aad;
+  color: #89c2ff;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+  word-wrap: break-word;
 }
 
+/* Capacity */
 .cylinder-capacity {
-  font-weight: 500;
-  color: #0077ff;
+  color: #a8cfff;
+  font-size: 0.9rem;
+  word-wrap: break-word;
 }
 
-.cylinder-row span {
+/* Stats (Full / Empty) */
+.c-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap; /* prevents overflow on small screens */
+}
+
+.c-stats span {
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
   font-weight: 500;
 }
 
-/* Mobile friendly tweaks */
+/* Color-coded values */
+.c-stats span:first-child {
+  color: #00e676; /* green for full */
+  background: rgba(0, 230, 118, 0.1);
+}
+
+.c-stats span:last-child {
+  color: #ff5252; /* red for empty */
+  background: rgba(255, 82, 82, 0.1);
+}
+
+/* Total quantity */
+.cylinder-quantity {
+  margin-top: 0.5rem;
+  font-weight: 500;
+  color: #cde1ff;
+  font-size: 0.9rem;
+  word-wrap: break-word;
+}
+
+/* Responsive */
 @media (max-width: 600px) {
-  .cylinder-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
+  .cylinder-item {
+    padding: 0.7rem;
+  }
+
+  .cylinder-name {
+    font-size: 0.95rem;
+  }
+
+  .cylinder-capacity,
+  .c-stats,
+  .cylinder-quantity {
+    font-size: 0.85rem;
   }
 }

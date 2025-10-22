@@ -1,66 +1,60 @@
 import { useEffect, useState } from "react";
 import "./CylindersSummary.css";
+
 export default function CylindersSummary({ cylinders = [] }) {
   const [display, setDisplay] = useState({
-    totalTypes: 0,
     totalQty: 0,
-    totalValue: 0,
+    totalTypes: 0,
+    totalFull: 0,
+    totalEmpty: 0,
   });
 
-  // Actual values
-  const totalTypes = cylinders.length;
+  // Compute summaries
   const totalQty = cylinders.reduce(
     (acc, c) => acc + Number(c.quantity || 0),
     0
   );
-  const totalValue = cylinders.reduce(
-    (acc, c) =>
-      acc +
-      (Number(c.cylinderBuyingPrice || 0) + Number(c.gasBuyingPrice || 0)) *
-        Number(c.quantity || 0),
+  const totalTypes = cylinders.length;
+  const totalFull = cylinders.reduce((acc, c) => acc + Number(c.full || 0), 0);
+  const totalEmpty = cylinders.reduce(
+    (acc, c) => acc + Number(c.empty || 0),
     0
   );
 
   useEffect(() => {
-    const duration = 1000; // 1 second animation
-    const startTime = performance.now();
+    const duration = 800;
+    const start = performance.now();
 
     const animate = (now) => {
-      const progress = Math.min((now - startTime) / duration, 1);
-
+      const p = Math.min((now - start) / duration, 1);
       setDisplay({
-        totalTypes: Math.floor(progress * totalTypes),
-        totalQty: Math.floor(progress * totalQty),
-        totalValue: Math.floor(progress * totalValue),
+        totalQty: Math.floor(p * totalQty),
+        totalTypes: Math.floor(p * totalTypes),
+        totalFull: Math.floor(p * totalFull),
+        totalEmpty: Math.floor(p * totalEmpty),
       });
-
-      if (progress < 1) requestAnimationFrame(animate);
+      if (p < 1) requestAnimationFrame(animate);
     };
-
     requestAnimationFrame(animate);
-  }, [totalTypes, totalQty, totalValue]);
+  }, [totalQty, totalTypes, totalFull, totalEmpty]);
 
   return (
     <div className="cylinder-summary">
-      {/* 📊 Summary Cards */}
       <div className="summary-card">
-        <h4>Total Types</h4>
-        <p>{display.totalTypes}</p>
-      </div>
-
-      <div className="summary-card">
-        <h4>Total Quantity</h4>
+        <h4>Total Cylinders</h4>
         <p>{display.totalQty}</p>
       </div>
-
       <div className="summary-card">
-        <h4>Total Stock Value</h4>
-        <p>
-          Ksh{" "}
-          {display.totalValue.toLocaleString("en-KE", {
-            minimumFractionDigits: 0,
-          })}
-        </p>
+        <h4>Types</h4>
+        <p>{display.totalTypes}</p>
+      </div>
+      <div className="summary-card">
+        <h4>Full</h4>
+        <p>{display.totalFull}</p>
+      </div>
+      <div className="summary-card">
+        <h4>Empty</h4>
+        <p>{display.totalEmpty}</p>
       </div>
     </div>
   );

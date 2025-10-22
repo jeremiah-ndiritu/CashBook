@@ -7,13 +7,12 @@ export default function CylinderItem({ cylinder }) {
         {cylinder.capacity}
         {cylinder.capacityUnit || "kg"}
       </div>
-      <div className="cylinder-prices">
-        <span>💰 Buy: {cylinder.cylinderBuyingPrice}</span>
-        <span>🛢 Gas: {cylinder.gasBuyingPrice}</span>
-        <span>💵 Sell: {cylinder.sellingPrice}</span>
-        <span>🔄 Refill: {cylinder.refillPrice}</span>
+      <div className="c-stats">
+        <span>Full: {cylinder.full}</span>
+        <span>Empty: {cylinder.empty}</span>
       </div>
-      <div className="cylinder-quantity">📦 Qty: {cylinder.quantity}</div>
+
+      <div className="cylinder-quantity">📦 Total: {cylinder.quantity}</div>
     </div>
   );
 }

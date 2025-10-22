@@ -1,6 +1,8 @@
 // src/db.js
 import { openDB } from "idb";
 import { normalizeDebt, normalizeTransaction } from "./utils/utils";
+import { refillGas, updateCylinderQuantity } from "./utils/cylinders";
+import { toast } from "react-toastify";
 
 export const DB_NAME = "cashbook-db";
 export const STORE_TRANSACTIONS = "transactions";
@@ -47,6 +49,23 @@ export async function initDB() {
 export async function addTransaction(transaction) {
   const db = await initDB();
   await db.add(STORE_TRANSACTIONS, transaction);
+
+  //GAS actions: buy, refill or sell
+  let isGas = transaction.txnProduct == "gas";
+  if (isGas && transaction.gasAction == "buy") {
+    updateCylinderQuantity(transaction.txnGasId, transaction.quantity);
+  }
+  if (isGas && transaction.gasAction == "sell") {
+    updateCylinderQuantity(transaction.txnGasId, -transaction.quantity);
+  }
+  if (isGas && transaction.gasAction == "refill") {
+    const res = await refillGas(transaction.txnGasId, transaction.quantity);
+    if (res) {
+      toast.success("Gas refilled successfully!" + res.id);
+    } else {
+      toast.error("Error updating cylinders!");
+    }
+  }
 
   // If credit is partial or unpaid, save debt info
   if (transaction.paymentStatus && transaction.paymentStatus !== "paid") {

@@ -24,7 +24,7 @@ function getTodayKey() {
   return `${year}-${month}-${day}`;
 }
 
-export default function App() {
+export default function Workspace() {
   const [transactions, setTransactions] = useState([]);
   const [debts, setDebts] = useState([]);
   const [todayKey, setTodayKey] = useState(getTodayKey());
