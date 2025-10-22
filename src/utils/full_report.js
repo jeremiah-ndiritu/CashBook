@@ -13,6 +13,7 @@ export function fullReport(
   y,
   transactions,
   debts,
+  cylinders,
   incomeTotals,
   expenseTotals
 ) {
@@ -129,6 +130,65 @@ export function fullReport(
       }
       doc.text(`Net Debts: Ksh ${netDebts.toFixed(2)}`, 14, finalY + 20);
     }
+  }
+
+  // Cylinders Summary & Table
+  if (cylinders && cylinders.length > 0) {
+    doc.addPage();
+    doc.setFontSize(16);
+    doc.setTextColor(22, 163, 74);
+    doc.text("Gas Cylinders Summary", 14, 20);
+
+    // 🔹 Summary calculations
+    const totalCylinders = cylinders.length;
+    const totalQuantity = cylinders.reduce(
+      (sum, c) => sum + (c.quantity || 0),
+      0
+    );
+    const totalFull = cylinders.reduce((sum, c) => sum + (c.full || 0), 0);
+    const totalEmpty = cylinders.reduce((sum, c) => sum + (c.empty || 0), 0);
+
+    // 🧾 Summary display
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total Cylinder Types: ${totalCylinders}`, 14, 35);
+    doc.text(`Total Quantity in Stock: ${totalQuantity}`, 14, 43);
+
+    // 🔸 Table rows
+    const cylinderRows = cylinders.map((c) => [
+      c.name || "-",
+      `${c.capacity}${c.capacityUnit || "kg"}`,
+      c.full,
+      c.empty,
+      (c.quantity ?? 0).toString(),
+    ]);
+
+    // 🧮 Add total row at the end
+    cylinderRows.push([
+      "TOTALS",
+      "-",
+      totalFull.toString(),
+      totalEmpty.toString(),
+      totalQuantity.toString(),
+    ]);
+
+    // 🧱 Table
+    autoTable(doc, {
+      head: [["Name", "Capacity", "Full", "Empty", "Total"]],
+      body: cylinderRows,
+      startY: 60,
+      styles: { fontSize: 11, cellPadding: 3 },
+      headStyles: { fillColor: [22, 163, 74], textColor: 255 },
+      bodyStyles: { halign: "center" },
+      didParseCell: (data) => {
+        // 🌿 Trewa-green total row
+        if (data.row.index === cylinderRows.length - 1) {
+          data.cell.styles.fillColor = [22, 163, 74]; // Trewa green
+          data.cell.styles.textColor = 255; // White text
+          data.cell.styles.fontStyle = "bold";
+        }
+      },
+    });
   }
 
   doc.save(`cashbook-report-${getLocalDateTimeKey()}.pdf`);

@@ -1,11 +1,12 @@
 // src/components/ExportPDF.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import "../styles/ExportPDF.css";
 
 import { filterTransactions, makeReportTitle } from "../utils/utils";
 import { getIncomeTotals } from "../utils/income";
 import { getExpenseTotals } from "../utils/expenses";
+import { getCylinders } from "../utils/cylinders";
 
 import { filterDebts } from "../utils/utils";
 import { summaryReport } from "../utils/summary_report";
@@ -13,9 +14,15 @@ import { toast } from "react-toastify";
 import { fullReport } from "../utils/full_report";
 export default function ExportPDF({ transactions, debts }) {
   const [reportType, setReportType] = useState("today");
+  const [cylinders, setCylinders] = useState([]);
 
-  // Filter transactions based on report type
-
+  useEffect(() => {
+    const lcs = async () => {
+      let cs = await getCylinders();
+      setCylinders(cs);
+    };
+    lcs();
+  }, []);
   const generatePDF = (mode = "full") => {
     const filteredTransactions = filterTransactions(transactions, reportType);
     if (filteredTransactions.length === 0) {
@@ -57,6 +64,7 @@ export default function ExportPDF({ transactions, debts }) {
         40,
         filteredTransactions,
         debts,
+        cylinders,
         incomeTotals,
         expenseTotals
       );
